@@ -29,10 +29,6 @@ fun AppNavigator() {
         composable("home") {
             HomeActivity(navController)
         }
-        composable("events") { MyEventsActivity() }
-        composable("search") { SearchActivity() }
-        composable("explore") { ExploreActivity() }
-        composable("profile") { ProfileActivity() }
     }
 }
 
