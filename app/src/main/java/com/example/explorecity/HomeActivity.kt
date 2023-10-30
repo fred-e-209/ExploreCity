@@ -19,14 +19,17 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SmallTopAppBar
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -108,7 +111,8 @@ fun HomeActivity(navController: NavController) {
                 composable("events") { MyEventsActivity(navBarController) }
                 composable("search") { SearchActivity() }
                 composable("explore") { ExploreActivity() }
-                composable("profile") { ProfileActivity(navController) }
+                composable("profile") { ProfileActivity(navController)}
+                composable("details") { DetailsActivity(navBarController)}
         }
     }
 }
