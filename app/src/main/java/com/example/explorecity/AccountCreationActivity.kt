@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -30,13 +31,13 @@ import com.example.explorecity.ui.theme.DarkBlue
             modifier = Modifier.fillMaxSize() // This will make the Box fill the entire screen
         ) {
             // Back Button at the top left corner
-            Button(
+            IconButton(
                 onClick = { navController.navigate("login") },
                 modifier = Modifier
                     .align(Alignment.TopStart) // This will align the button to the top-left corner
                     .padding(
-                        top = 16.dp,
-                        start = 16.dp
+                        top = 8.dp,
+                        start = 8.dp
                     ) // Added top and start padding for visual spacing from edges
             ) {
                 Image(
@@ -116,7 +117,9 @@ import com.example.explorecity.ui.theme.DarkBlue
 
                 // Create Account Button
                 Button(
-                    onClick = { /* Handle account creation logic */ },
+                    onClick = {
+                          //TODO: Handle Account Creation Stuff
+                    },
                     modifier = Modifier
                         .fillMaxWidth()
                 ) {

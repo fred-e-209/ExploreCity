@@ -110,16 +110,17 @@ fun LoginActivity(navController: NavController) {
             Spacer(modifier = Modifier.weight(1f))  // This takes up one-third of the width
             Button(
                 onClick = {
-                    toastMessage = if (username == "Tester" && password == "1234") {
+                    // TODO: Handle Login Stuff
+                    if (username == "Tester" && password == "1234") {
                         // Logic for successful login
-                        "Login successful!"
+                        toastMessage = "Login successful!"
+                        navController.navigate("home")
                     } else {
                         // Logic for unsuccessful login
-                        "Login Failed!"
+                        toastMessage = "Login Failed!"
                     }
-                    navController.navigate("home")
                 },
-                modifier = Modifier.weight(3f)
+                modifier = Modifier.weight(10f)
             ) {
                 Text("Submit")
             }
@@ -136,9 +137,26 @@ fun LoginActivity(navController: NavController) {
             // Create Account Button
             Button(onClick = {
                 navController.navigate("create_account")
-            }, modifier = Modifier.weight(3f))
+            }, modifier = Modifier.weight(10f))
             {
                 Text(text = "Create Account")
+            }
+            Spacer(modifier = Modifier.weight(1f))  // This takes up one-third of the width
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Spacer(modifier = Modifier.weight(1f))  // This takes up one-third of the width
+            // Create Account Button
+            Button(onClick = {
+                navController.navigate("home")
+            }, modifier = Modifier.weight(10f))
+            {
+                Text(text = "Continue as Guest")
             }
             Spacer(modifier = Modifier.weight(1f))  // This takes up one-third of the width
         }
@@ -157,15 +175,6 @@ fun DisplayToast(message: String) {
         Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
     }
 }
-
-@Composable
-fun ShowToast(message: String) {
-    val context = LocalContext.current
-    LaunchedEffect(message) {
-        Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
-    }
-}
-
 
 @Preview(showBackground = true)
 @Composable

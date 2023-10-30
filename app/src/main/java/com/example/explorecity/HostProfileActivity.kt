@@ -24,7 +24,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 
 @Composable
-fun ProfileActivity(navController: NavController) {
+fun HostProfileActivity(navController: NavController) {
     Column(
         modifier = Modifier.fillMaxSize().padding(top = 16.dp, start = 16.dp, end = 16.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -48,24 +48,10 @@ fun ProfileActivity(navController: NavController) {
 
         Button(onClick = {
             // Action for "Host your Own Events!"
-            navController.navigate("host_home")
+            navController.navigate("home")
         }) {
-            Text("Host your Own Events!")
+            Text("View Other Events!")
         }
     }
 }
 
-@Composable
-fun ClickableTextItem(text: String, onClick: () -> Unit) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable(onClick = onClick)
-            .padding(vertical = 16.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween
-    ) {
-        Text(text = text)
-        Icon(Icons.Default.ArrowForward, contentDescription = "Arrow Icon")
-    }
-}
