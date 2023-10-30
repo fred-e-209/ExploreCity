@@ -26,8 +26,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.example.explorecity.ui.theme.DarkBlue
 import androidx.compose.ui.viewinterop.AndroidView
+import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.MapView
+import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.MarkerOptions
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -111,11 +114,31 @@ fun GoogleMapsView() {
     ) { mapView ->
         // This code block will be executed when the MapView is ready
         mapView.getMapAsync { googleMap ->
-            // You can configure the GoogleMap here
+            // Set the initial location to College Station, Texas
+            val collegeStation = LatLng(30.627977, -96.334406) // College Station coordinates
+            val cameraUpdate = CameraUpdateFactory.newLatLngZoom(collegeStation, 15f) // 14f is the zoom level
+            googleMap.moveCamera(cameraUpdate)
+
+            // Add a marker for Kyle Field
+            val kyleField = LatLng(30.610657, -96.340695) // Kyle Field coordinates
+            val kyleFieldMarker = MarkerOptions()
+                .position(kyleField)
+                .title("Aggie Football")
+                .snippet("Time: 8:00 PM")
+            googleMap.addMarker(kyleFieldMarker)
+
+            // Add a marker for The Zachry Engineering Building
+            val zachryBuilding = LatLng(30.618519, -96.337866) // Zachry Building coordinates
+            val zachryBuildingMarker = MarkerOptions()
+                .position(zachryBuilding)
+                .title("Study")
+                .snippet("Time: 8:00 PM")
+            googleMap.addMarker(zachryBuildingMarker)
         }
     }
-
 }
+
+
 
 @Composable
 fun EventsListView() {
