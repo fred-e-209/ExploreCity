@@ -33,6 +33,9 @@ fun AppNavigator() {
         composable("host_prof") {
             HostProfileActivity(navController)
         }
+        composable("create_event") {
+            EventCreationActivity(navController)
+        }
     }
 }
 
