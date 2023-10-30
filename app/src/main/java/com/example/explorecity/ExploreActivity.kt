@@ -25,6 +25,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.example.explorecity.ui.theme.DarkBlue
+import androidx.compose.ui.viewinterop.AndroidView
+import com.google.android.gms.maps.GoogleMap
+import com.google.android.gms.maps.MapView
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -83,18 +87,34 @@ fun ExploreActivity() {
                 .padding(paddingValues)
         ) {
             when (viewMode.value) {
-                "map" -> GoogleMapsView()
+                "map" -> GoogleMapsView() // Add GoogleMapsView here
                 "list" -> EventsListView()
             }
         }
     }
 }
 
+
+
+
 @Composable
 fun GoogleMapsView() {
-    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        Text("Google Maps View Here")
+    AndroidView(
+        factory = { context ->
+            MapView(context).apply {
+                // Initialize the MapView
+                onCreate(null)
+                onResume()
+            }
+        },
+        modifier = Modifier.fillMaxSize(),
+    ) { mapView ->
+        // This code block will be executed when the MapView is ready
+        mapView.getMapAsync { googleMap ->
+            // You can configure the GoogleMap here
+        }
     }
+
 }
 
 @Composable
