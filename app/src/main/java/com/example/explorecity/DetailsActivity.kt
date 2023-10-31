@@ -54,17 +54,7 @@ fun DetailsActivity(navBarController: NavController) {
             .verticalScroll(rememberScrollState())
             .padding(16.dp)
     ) {
-        // TopBar with back button and more (three dots) button
-   /*     TopAppBar(
-            navigationIcon = {
-                Icon(Icons.Default.ArrowBack, contentDescription = "Back", modifier = Modifier.clickable(onClick = { navBarController.navigate("events") }))
-            },
-            actions = {
-                Icon(Icons.Default.MoreVert, contentDescription = "More options")
-            },
-            title = {Text(text = "")},
-        )
-*/
+
         Icon(Icons.Default.ArrowBack, contentDescription = "Back", modifier = Modifier.clickable(onClick = { navBarController.navigate("events") }))
 
         Spacer(modifier = Modifier.height(16.dp))
