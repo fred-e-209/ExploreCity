@@ -115,7 +115,7 @@ fun HomeActivity(navController: NavController) {
             NavHost(navBarController, startDestination = "events") {
                 composable("events") { MyEventsActivity(navBarController) }
                 composable("search") { SearchActivity(navController) }
-                composable("explore") { ExploreActivity() }
+                composable("explore") { ExploreActivity(navBarController) }
                 composable("profile") { ProfileActivity(navController)}
                 composable("details") { DetailsActivity(navBarController)}
         }

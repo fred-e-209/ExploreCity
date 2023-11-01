@@ -36,6 +36,9 @@ fun AppNavigator() {
         composable("create_event") {
             EventCreationActivity(navController)
         }
+        composable("event_details") {
+            DetailsActivity(navController)
+        }
     }
 }
 

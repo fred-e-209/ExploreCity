@@ -1,13 +1,20 @@
 package com.example.explorecity
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.Place
 import androidx.compose.material.icons.filled.Star
+import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -23,22 +30,30 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.explorecity.ui.theme.DarkBlue
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.navigation.NavController
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.MapView
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
+import com.google.maps.android.compose.AdvancedMarker
 import com.google.maps.android.compose.GoogleMap
+import com.google.maps.android.compose.Marker
+import com.google.maps.android.compose.MarkerInfoWindow
+import com.google.maps.android.compose.MarkerState
 import com.google.maps.android.compose.rememberCameraPositionState
+import com.google.maps.android.compose.rememberMarkerState
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ExploreActivity() {
+fun ExploreActivity(navController: NavController) {
     // Mutable state to keep track of the current view
     val viewMode = remember { mutableStateOf("map") } // "map" or "list"
 
@@ -93,7 +108,7 @@ fun ExploreActivity() {
                 .padding(paddingValues)
         ) {
             when (viewMode.value) {
-                "map" -> GoogleMapsView() // Add GoogleMapsView here
+                "map" -> GoogleMapsView(navController) // Add GoogleMapsView here
                 "list" -> EventsListView()
             }
         }
@@ -104,56 +119,67 @@ fun ExploreActivity() {
 
 
 @Composable
-fun GoogleMapsView() {
-    // Old Stuff
-  /*  AndroidView(
-        factory = { context ->
-            MapView(context).apply {
-                // Initialize the MapView
-                onCreate(null)
-                onResume()
-            }
-        },
-        modifier = Modifier.fillMaxSize(),
-    ) { mapView ->
-        // This code block will be executed when the MapView is ready
-        mapView.getMapAsync { googleMap ->
-            // Set the initial location to College Station, Texas
-            val collegeStation = LatLng(30.627977, -96.334406) // College Station coordinates
-            val cameraUpdate = CameraUpdateFactory.newLatLngZoom(collegeStation, 15f) // 14f is the zoom level
-            googleMap.moveCamera(cameraUpdate)
-
-            // Add a marker for Kyle Field
-            val kyleField = LatLng(30.610657, -96.340695) // Kyle Field coordinates
-            val kyleFieldMarker = MarkerOptions()
-                .position(kyleField)
-                .title("Aggie Football")
-                .snippet("Time: 8:00 PM")
-            googleMap.addMarker(kyleFieldMarker)
-
-            // Add a marker for The Zachry Engineering Building
-            val zachryBuilding = LatLng(30.618519, -96.337866) // Zachry Building coordinates
-            val zachryBuildingMarker = MarkerOptions()
-                .position(zachryBuilding)
-                .title("Study")
-                .snippet("Time: 8:00 PM")
-            googleMap.addMarker(zachryBuildingMarker)
-        }
-    }*/
-
-    val singapore = LatLng(1.35, 103.87)
+fun GoogleMapsView(navController: NavController) {
+    val collegeStation = LatLng(30.627977, -96.334406)
     val cameraPositionState = rememberCameraPositionState {
-        position = CameraPosition.fromLatLngZoom(singapore, 10f)
+        position = CameraPosition.fromLatLngZoom(collegeStation, 14.5f)
     }
     GoogleMap(
         modifier = Modifier.fillMaxSize(),
         cameraPositionState = cameraPositionState
-    )
+    ) {
+        Marker(
+            state = rememberMarkerState(position = collegeStation),
+            draggable = true,
+            title = "Cstat",
+            snippet = "Time: 8:00 pm"
+        )
+        MarkerInfoWindow(
+            state = MarkerState(position = LatLng(30.610657, -96.340695))
+            /*onInfoWindowClick = {
+                // Handle the click event
+                navController.navigate("details")
+            }*/
+
+        ) { marker ->
+            Box(
+                modifier = Modifier
+                    .padding(16.dp) // Adjust padding for spacing
+                    .background(Color.White, shape = RoundedCornerShape(8.dp)) // Adjust corner radius
+                    .clickable {
+                        navController.navigate("details")
+                    }
+            ) {
+                Column(
+                    modifier = Modifier.padding(16.dp)
+                ) {
+                    Text(
+                        text = marker.title ?: "Aggie Football",
+                        color = Color.Black,
+                        style = TextStyle(fontWeight = FontWeight.Bold)
+                    )
+                    Spacer(modifier = Modifier.height(8.dp)) // Add more vertical space
+                    Text(
+                        text = marker.snippet ?: "Time: 8:00PM",
+                        color = Color.Black,
+                        style = TextStyle(fontWeight = FontWeight.Normal)
+                    )
+                }
+            }
+        }
+    }
 }
+
+
+
+
+
 
 
 
 @Composable
 fun EventsListView() {
-    Text("List View Coming Soon...")
+    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        Text("List of Events Here (like My Events Page)")
+    }
 }
