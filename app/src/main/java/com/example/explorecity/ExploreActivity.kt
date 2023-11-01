@@ -29,8 +29,11 @@ import androidx.compose.ui.viewinterop.AndroidView
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.MapView
+import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
+import com.google.maps.android.compose.GoogleMap
+import com.google.maps.android.compose.rememberCameraPositionState
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -102,7 +105,8 @@ fun ExploreActivity() {
 
 @Composable
 fun GoogleMapsView() {
-    AndroidView(
+    // Old Stuff
+  /*  AndroidView(
         factory = { context ->
             MapView(context).apply {
                 // Initialize the MapView
@@ -135,14 +139,21 @@ fun GoogleMapsView() {
                 .snippet("Time: 8:00 PM")
             googleMap.addMarker(zachryBuildingMarker)
         }
+    }*/
+
+    val singapore = LatLng(1.35, 103.87)
+    val cameraPositionState = rememberCameraPositionState {
+        position = CameraPosition.fromLatLngZoom(singapore, 10f)
     }
+    GoogleMap(
+        modifier = Modifier.fillMaxSize(),
+        cameraPositionState = cameraPositionState
+    )
 }
 
 
 
 @Composable
 fun EventsListView() {
-    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        Text("List of Events Here (like My Events Page)")
-    }
+    Text("List View Coming Soon...")
 }

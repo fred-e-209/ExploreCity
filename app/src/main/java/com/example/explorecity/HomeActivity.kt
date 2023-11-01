@@ -17,7 +17,9 @@ import androidx.compose.material3.Icon
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarDefaults
 import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SmallTopAppBar
 import androidx.compose.material3.Surface
@@ -28,6 +30,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
@@ -81,7 +84,9 @@ fun HomeActivity(navController: NavController) {
     Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
         Scaffold (
             bottomBar = {
-                NavigationBar  {
+                NavigationBar (
+                    containerColor = Color.White
+                ) {
                     items.forEachIndexed { index, item ->
                         NavigationBarItem(
                             selected = selectedItemIndex == index,
@@ -102,14 +107,14 @@ fun HomeActivity(navController: NavController) {
                                         }else item.unselectedIcon
                                         , contentDescription = "Nav Bar Icon"
                                     )
-                            })
+                            },)
                     }
                 }
             }
         ) {
             NavHost(navBarController, startDestination = "events") {
                 composable("events") { MyEventsActivity(navBarController) }
-                composable("search") { SearchActivity() }
+                composable("search") { SearchActivity(navController) }
                 composable("explore") { ExploreActivity() }
                 composable("profile") { ProfileActivity(navController)}
                 composable("details") { DetailsActivity(navBarController)}
