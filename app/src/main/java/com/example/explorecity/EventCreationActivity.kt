@@ -34,6 +34,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -47,14 +48,18 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.toSize
 import androidx.navigation.NavController
+import com.example.explorecity.api.classes.event.EventBody
+import com.example.explorecity.api.classes.event.Location
+import com.example.explorecity.api.models.ApiViewModel
+import kotlinx.coroutines.launch
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EventCreationActivity(navController: NavController  ) {
-    val eventName = remember { mutableStateOf("") }
-    val eventLocation = remember { mutableStateOf("") }
-    val eventDetails = remember { mutableStateOf("") }
+    var eventName: String by remember { mutableStateOf("") }
+    var eventLocation by remember { mutableStateOf("") }
+    var eventDetails: String by remember { mutableStateOf("") }
     var eventType by remember { mutableStateOf("") }
     var mExpanded by remember { mutableStateOf(false) }
     var mTextFieldSize by remember { mutableStateOf(Size.Zero)}
@@ -66,6 +71,20 @@ fun EventCreationActivity(navController: NavController  ) {
         Icons.Filled.KeyboardArrowUp
     else
         Icons.Filled.KeyboardArrowDown
+
+    // Toast for messages
+    var toastMessage by remember { mutableStateOf<String?>(null) }
+
+    // Event body for POST request
+    val eventBody = EventBody(
+        displayname = eventName,
+        description = eventDetails,
+        location = Location(43.2394, 54.2039)
+    )
+
+    // Scope for calling, and API handler
+    val scope = rememberCoroutineScope()
+    val apiVM = ApiViewModel()
 
     Scaffold(
         topBar = {
@@ -82,6 +101,16 @@ fun EventCreationActivity(navController: NavController  ) {
         floatingActionButton = {
             FloatingActionButton(onClick = {
                 // Handle event submission logic here
+                scope.launch {
+                    val eventID = apiVM.createEvent(eventBody)
+                    if (eventID > 0) {
+                        toastMessage = "Event Created!"
+                    } else {
+                        toastMessage = "Event not created"
+                    }
+                }
+
+
             }) {
                 Icon(Icons.Default.Check, contentDescription = "Submit Event")
             }
@@ -115,11 +144,13 @@ fun EventCreationActivity(navController: NavController  ) {
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     TextField(
-                        value = eventName.value,
-                        onValueChange = { eventName.value = it },
+                        value = eventName,
+                        onValueChange = { eventName = it },
                         label = { Text("Event Name") },
-                        colors = TextFieldDefaults.textFieldColors(
-                            containerColor = Color.White
+                        colors = TextFieldDefaults.colors(
+                            focusedContainerColor = Color.White,
+                            unfocusedContainerColor = Color.White,
+                            disabledContainerColor = Color.White,
                         ),
                         modifier = Modifier
                             .padding(20.dp)
@@ -145,8 +176,10 @@ fun EventCreationActivity(navController: NavController  ) {
                                 Icon(icon, "contentDescription",
                                     Modifier.clickable { mExpanded = !mExpanded })
                             },
-                            colors = TextFieldDefaults.textFieldColors(
-                                containerColor = Color.White
+                            colors = TextFieldDefaults.colors(
+                                focusedContainerColor = Color.White,
+                                unfocusedContainerColor = Color.White,
+                                disabledContainerColor = Color.White,
                             )
                         )
 
@@ -169,11 +202,13 @@ fun EventCreationActivity(navController: NavController  ) {
                     //DropdownMenuForEventType(eventType)
                     Spacer(modifier = Modifier.height(8.dp))
                     TextField(
-                        value = eventLocation.value,
-                        onValueChange = { eventLocation.value = it },
+                        value = eventLocation,
+                        onValueChange = { eventLocation = it },
                         label = { Text("Event Location") },
-                        colors = TextFieldDefaults.textFieldColors(
-                            containerColor = Color.White
+                        colors = TextFieldDefaults.colors(
+                            focusedContainerColor = Color.White,
+                            unfocusedContainerColor = Color.White,
+                            disabledContainerColor = Color.White,
                         ),
                         modifier = Modifier
                             .padding(20.dp)
@@ -181,20 +216,26 @@ fun EventCreationActivity(navController: NavController  ) {
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     TextField(
-                        value = eventDetails.value,
-                        onValueChange = { eventDetails.value = it },
+                        value = eventDetails,
+                        onValueChange = { eventDetails = it },
                         label = { Text("Event Details") },
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(20.dp)
-                            .height(200.dp)
-                        , // modify accordingly
-                        colors = TextFieldDefaults.textFieldColors(
-                            containerColor = Color.White
+                            .height(200.dp), // modify accordingly
+                        colors = TextFieldDefaults.colors(
+                            focusedContainerColor = Color.White,
+                            unfocusedContainerColor = Color.White,
+                            disabledContainerColor = Color.White,
                         )
                     )
                 }
             }
         }
+    }
+    toastMessage?.let { message ->
+        DisplayToast(message = message)
+        // Clear the toast message to avoid displaying it again on recomposition
+        toastMessage = null
     }
 }

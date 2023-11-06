@@ -1,4 +1,4 @@
-package com.example.explorecity.api.classes
+package com.example.explorecity.api.classes.auth
 
 data class RegistrationErrorResponse(
     val description: String,

@@ -1,8 +1,9 @@
 package com.example.explorecity.api.callers
 
-import com.example.explorecity.api.classes.LoginValidResponse
-import com.example.explorecity.api.classes.RegistrationBody
-import com.example.explorecity.api.classes.RegistrationResponse
+import com.example.explorecity.api.classes.auth.LoginValidResponse
+import com.example.explorecity.api.classes.auth.RegistrationBody
+import com.example.explorecity.api.classes.auth.RegistrationResponse
+import com.example.explorecity.api.classes.event.EventBody
 import retrofit2.Call
 import retrofit2.http.Body
 import retrofit2.http.GET
@@ -14,4 +15,7 @@ interface ApiInterfaces {
 
     @POST("/auth")
     fun registerUser(@Body registrationBody: RegistrationBody): Call<RegistrationResponse>
+
+    @POST("/event")
+    suspend fun createNewEvent(@Body eventBody: EventBody): RegistrationResponse
 }

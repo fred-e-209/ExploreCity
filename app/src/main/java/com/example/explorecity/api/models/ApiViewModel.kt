@@ -6,15 +6,16 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.explorecity.api.callers.RetrofitInstance
-import com.example.explorecity.api.classes.LoginValidResponse
-import com.example.explorecity.api.classes.RegistrationBody
+import com.example.explorecity.api.classes.auth.LoginValidResponse
+import com.example.explorecity.api.classes.auth.RegistrationBody
 import com.example.explorecity.api.repository.Repository
 import kotlinx.coroutines.launch
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
-import com.example.explorecity.api.classes.RegistrationErrorResponse
-import com.example.explorecity.api.classes.RegistrationResponse
+import com.example.explorecity.api.classes.auth.RegistrationErrorResponse
+import com.example.explorecity.api.classes.auth.RegistrationResponse
+import com.example.explorecity.api.classes.event.EventBody
 import org.json.JSONArray
 import org.json.JSONException
 
@@ -53,7 +54,7 @@ class ApiViewModel: ViewModel() {
                 if (response.errorBody() != null && response.code() == 422) {
                     Log.d("REGISTRATION", "body is not good")
                     try {
-                        listOfErrors = parseRegistrationErrors(response.errorBody().toString())
+                        listOfErrors = parseRegistrationErrors(response.errorBody()!!.string())
                     } catch (e: Exception) {
                         Log.e("REGISTRATION", "Error while parsing")
                     }
@@ -68,22 +69,19 @@ class ApiViewModel: ViewModel() {
                 Log.e("REGISTRATION", t.message.toString())
             }
         })
-        return if (userID > 0) {
-            Pair(userID, emptyList())
-        } else {
-            Pair(-1, listOfErrors)
-        }
+        return Pair(userID, listOfErrors)
     }
 
     fun parseRegistrationErrors(errorJSON: String): List<RegistrationErrorResponse> {
         val myList = mutableListOf<RegistrationErrorResponse>()
         try {
             val jsonArray = JSONArray(errorJSON)
+            Log.d("REGISTRATION", "Length: ${jsonArray.length()}, body: $errorJSON")
             for (i in 0 until jsonArray.length()) {
                 val errorObject = jsonArray.getJSONObject(i)
                 val description = errorObject.optString("description")
                 val field = errorObject.optString("field")
-                myList.add(RegistrationErrorResponse(description, field))
+                myList.add(RegistrationErrorResponse(description = description, field = field))
             }
         } catch (e: JSONException) {
             e.printStackTrace()
@@ -95,6 +93,15 @@ class ApiViewModel: ViewModel() {
         return try {
             val userAuth = RetrofitInstance.authenticateUser().validateLogin()
             userAuth.id
+        } catch (e: Exception) {
+            -1
+        }
+    }
+
+    suspend fun createEvent(eventBody: EventBody): Int {
+        return try {
+            val event = RetrofitInstance.authenticateUser().createNewEvent(eventBody)
+            event.id
         } catch (e: Exception) {
             -1
         }

@@ -26,9 +26,10 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import com.example.explorecity.api.classes.RegistrationBody
+import com.example.explorecity.api.classes.auth.RegistrationBody
 import com.example.explorecity.api.models.ApiViewModel
 import com.example.explorecity.ui.theme.DarkBlue
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @Composable
@@ -150,7 +151,8 @@ fun AccountCreationActivity(navController: NavController) {
                     // Check if reenteredPassword == newPassword
                     if (newPassword == reenteredPassword) {
                         scope.launch {
-                            val newUserID = ApiViewModel().createNewAccount(newAccount) // This returns a pair, int and list of error messages.
+                            val newUserID = ApiViewModel().createNewAccount(newAccount)
+                            // This returns a pair, int and list of error messages.
                             if (newUserID.first > 0) {
                                 toastMessage = "User Account Created!"
                                 navController.navigate("login")
@@ -158,6 +160,7 @@ fun AccountCreationActivity(navController: NavController) {
                                 val errorList = newUserID.second
                                 for (msg in errorList) {
                                     toastMessage = "Field (${msg.field}): ${msg.description}"
+                                    delay(1000)
                                 }
                                 toastMessage = "User Account Not Created"
                             }

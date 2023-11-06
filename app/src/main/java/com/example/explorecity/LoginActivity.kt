@@ -26,7 +26,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -35,16 +34,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.ImeAction
-import androidx.lifecycle.ViewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
-import com.example.explorecity.api.callers.RetrofitInstance
-import com.example.explorecity.api.classes.LoginValidResponse
 import com.example.explorecity.api.models.ApiViewModel
 import com.example.explorecity.api.models.UserInformation
 import com.example.explorecity.ui.theme.DarkBlue
-import com.google.android.gms.common.api.Api
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 
