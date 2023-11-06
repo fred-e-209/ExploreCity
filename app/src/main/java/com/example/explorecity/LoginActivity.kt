@@ -134,8 +134,8 @@ fun LoginActivity(navController: NavController, apiVM: ApiViewModel) {
                     userInfo.setPassword(password)
                     scope.launch {
                         Log.d("LAUNCH", "This is ran")
-                        var loginResponse = RetrofitInstance.authenticateUser().validateLogin()
-                        if (loginResponse.id > 0) {
+                        var loginResponse = ApiViewModel().isLoginValid()
+                        if (loginResponse > 0) {
                             // Logic for successful login
                             toastMessage = "Login successful!"
                             navController.navigate("home")
