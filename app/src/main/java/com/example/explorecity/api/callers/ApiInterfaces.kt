@@ -13,5 +13,5 @@ interface ApiInterfaces {
     suspend fun validateLogin(): LoginValidResponse
 
     @POST("/auth")
-    suspend fun registerUser(@Body registrationBody: RegistrationBody): RegistrationResponse
+    fun registerUser(@Body registrationBody: RegistrationBody): Call<RegistrationResponse>
 }

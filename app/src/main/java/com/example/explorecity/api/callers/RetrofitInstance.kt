@@ -1,7 +1,5 @@
 package com.example.explorecity.api.callers
 
-import android.util.Log
-import com.example.explorecity.api.classes.LoginValidResponse
 import com.example.explorecity.api.models.UserInformation
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit

@@ -150,11 +150,15 @@ fun AccountCreationActivity(navController: NavController) {
                     // Check if reenteredPassword == newPassword
                     if (newPassword == reenteredPassword) {
                         scope.launch {
-                            val newUserID = ApiViewModel().createNewAccount(newAccount)
-                            if (newUserID > 0) {
+                            val newUserID = ApiViewModel().createNewAccount(newAccount) // This returns a pair, int and list of error messages.
+                            if (newUserID.first > 0) {
                                 toastMessage = "User Account Created!"
                                 navController.navigate("login")
                             } else {
+                                val errorList = newUserID.second
+                                for (msg in errorList) {
+                                    toastMessage = "Field (${msg.field}): ${msg.description}"
+                                }
                                 toastMessage = "User Account Not Created"
                             }
                         }
