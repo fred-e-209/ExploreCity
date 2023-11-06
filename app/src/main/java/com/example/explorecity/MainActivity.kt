@@ -3,6 +3,7 @@ package com.example.explorecity
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.viewModels
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -11,15 +12,17 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.explorecity.api.models.ApiViewModel
+import com.example.explorecity.api.models.UserInformation
 import com.example.explorecity.ui.theme.ExploreCityTheme
 
 @Composable
-fun AppNavigator() {
+fun AppNavigator(viewModel: ApiViewModel) {
     val navController = rememberNavController()
 
     NavHost(navController = navController, startDestination = "login") {
         composable("login") {
-            LoginActivity(navController)
+            LoginActivity(navController, viewModel)
         }
         composable("create_account") {
             AccountCreationActivity(navController)
@@ -43,12 +46,18 @@ fun AppNavigator() {
 }
 
 class MainActivity : ComponentActivity() {
+    // View Model for the API
+    private val apiViewModel: ApiViewModel by viewModels()
+
+    // User Info Data Store instance
+    val userInfo = UserInformation.instance
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
             ExploreCityTheme {
                 Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
-                    AppNavigator()
+                    AppNavigator(apiViewModel)
                 }
             }
         }

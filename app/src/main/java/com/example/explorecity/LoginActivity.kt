@@ -1,5 +1,6 @@
 package com.example.explorecity
 
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
@@ -25,25 +26,42 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.ImeAction
+import androidx.lifecycle.ViewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import com.example.explorecity.api.callers.RetrofitInstance
+import com.example.explorecity.api.classes.LoginValidResponse
+import com.example.explorecity.api.models.ApiViewModel
+import com.example.explorecity.api.models.UserInformation
 import com.example.explorecity.ui.theme.DarkBlue
+import com.google.android.gms.common.api.Api
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun LoginActivity(navController: NavController) {
+fun LoginActivity(navController: NavController, apiVM: ApiViewModel) {
     var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var toastMessage by remember { mutableStateOf<String?>(null) }
     val  logoPainter = painterResource(id = R.drawable.logo)
+
+    // User Info instance
+    val userInfo = UserInformation.instance
+
+    // Make scope for API call
+    val scope = rememberCoroutineScope()
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -111,14 +129,29 @@ fun LoginActivity(navController: NavController) {
             Button(
                 onClick = {
                     // TODO: Handle Login Stuff
-                    if (username == "Tester" && password == "1234") {
-                        // Logic for successful login
-                        toastMessage = "Login successful!"
-                        navController.navigate("home")
-                    } else {
-                        // Logic for unsuccessful login
-                        toastMessage = "Login Failed!"
+                    // Store username and password for API
+                    userInfo.setUsername(username)
+                    userInfo.setPassword(password)
+                    scope.launch {
+                        Log.d("LAUNCH", "This is ran")
+                        var loginResponse = RetrofitInstance.authenticateUser().validateLogin()
+                        if (loginResponse.id > 0) {
+                            // Logic for successful login
+                            toastMessage = "Login successful!"
+                            navController.navigate("home")
+                        } else {
+                            // Logic for unsuccessful login
+                            toastMessage = "Login Failed!"
+                        }
                     }
+//                    if (username == "Tester" && password == "1234") {
+//                        // Logic for successful login
+//                        toastMessage = "Login successful!"
+//                        navController.navigate("home")
+//                    } else {
+//                        // Logic for unsuccessful login
+//                        toastMessage = "Login Failed!"
+//                    }
                 },
                 modifier = Modifier.weight(10f)
             ) {
@@ -180,5 +213,6 @@ fun DisplayToast(message: String) {
 @Composable
 fun PreviewLoginScreen() {
     val navController = rememberNavController()
-    LoginActivity(navController = navController)
+    val apiVM = ApiViewModel()
+    LoginActivity(navController = navController, apiVM)
 }

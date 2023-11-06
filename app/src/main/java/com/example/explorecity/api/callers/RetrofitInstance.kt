@@ -1,5 +1,6 @@
 package com.example.explorecity.api.callers
 
+import android.util.Log
 import com.example.explorecity.api.classes.LoginValidResponse
 import com.example.explorecity.api.models.UserInformation
 import okhttp3.OkHttpClient
@@ -10,6 +11,8 @@ object RetrofitInstance {
     private val apiInstance = UserInformation.instance
 
     private fun baseRequestWithAuthentication(): Retrofit {
+        Log.d("Retro", "${apiInstance.getUsername()}")
+        Log.d("Retro", "${apiInstance.getPassword()}")
         val client = OkHttpClient.Builder()
             .addInterceptor(BasicAuthInterceptor(apiInstance.getUsername(), apiInstance.getPassword()))
             .build()
@@ -28,5 +31,9 @@ object RetrofitInstance {
 
     val loginService: ApiInterfaces by lazy {
         baseRequestWithAuthentication().create(ApiInterfaces::class.java)
+    }
+
+    fun authenticateUser(): ApiInterfaces {
+        return baseRequestWithAuthentication().create(ApiInterfaces::class.java)
     }
 }

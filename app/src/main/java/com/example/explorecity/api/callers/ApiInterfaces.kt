@@ -6,7 +6,7 @@ import retrofit2.http.GET
 import retrofit2.http.POST
 
 interface ApiInterfaces {
-    @GET
+    @GET("/auth")
     suspend fun validateLogin(): LoginValidResponse
 
     @POST
