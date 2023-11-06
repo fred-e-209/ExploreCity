@@ -1,5 +1,6 @@
 package com.example.explorecity.api.callers
 
+import com.example.explorecity.api.classes.LoginValidResponse
 import com.example.explorecity.api.models.UserInformation
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
@@ -23,5 +24,9 @@ object RetrofitInstance {
             .baseUrl("https://api.explorecityapp.com")
             .addConverterFactory(GsonConverterFactory.create())
             .build()
+    }
+
+    val loginService: ApiInterfaces by lazy {
+        baseRequestWithAuthentication().create(ApiInterfaces::class.java)
     }
 }
