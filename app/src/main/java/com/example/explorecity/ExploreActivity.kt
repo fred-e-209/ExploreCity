@@ -1,5 +1,6 @@
 package com.example.explorecity
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -9,6 +10,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.List
@@ -25,6 +28,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -109,7 +113,7 @@ fun ExploreActivity(navController: NavController) {
         ) {
             when (viewMode.value) {
                 "map" -> GoogleMapsView(navController) // Add GoogleMapsView here
-                "list" -> EventsListView()
+                "list" -> EventsListView(navController)
             }
         }
     }
@@ -171,15 +175,23 @@ fun GoogleMapsView(navController: NavController) {
 }
 
 
-
-
-
-
-
-
+@SuppressLint("UnrememberedMutableState")
 @Composable
-fun EventsListView() {
-    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        Text("List of Events Here (like My Events Page)")
+fun EventsListView(navController: NavController) {
+    val events = mutableStateListOf(
+        Event("Month, Year- Time", "Event 1", "Address, City, State"),
+        Event("Month, Year- Time", "Event 2", "Address, City, State")
+        // ... add more events
+    )
+
+    Box(modifier = Modifier.fillMaxSize()) {
+        LazyColumn (modifier = Modifier.padding(5.dp)){
+            items(events) { event ->
+                EventCard(event, onClick = {
+                    // This is a placeholder for navigating to the event details
+                    navController.navigate("details")
+                })
+            }
+        }
     }
 }

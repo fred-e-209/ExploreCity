@@ -4,7 +4,6 @@ import android.annotation.SuppressLint
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -30,9 +29,7 @@ import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.Text import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -104,21 +101,27 @@ fun SearchActivity(navController: NavController) {
                             Text(text = "Type")
                             Row(
                                 horizontalArrangement = Arrangement.SpaceBetween,
-                                modifier = Modifier.fillMaxWidth().padding(bottom = 5.dp)
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(bottom = 5.dp)
                             ) {
                                 EventTypeButton("Music", selectedEventTypes)
                                 EventTypeButton("Sports", selectedEventTypes)
                             }
                             Row(
                                 horizontalArrangement = Arrangement.SpaceBetween,
-                                modifier = Modifier.fillMaxWidth().padding(bottom = 5.dp)
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(bottom = 5.dp)
                             ) {
                                 EventTypeButton("Religious", selectedEventTypes)
                                 EventTypeButton("Tourism", selectedEventTypes)
                             }
                             Row(
                                 horizontalArrangement = Arrangement.SpaceBetween,
-                                modifier = Modifier.fillMaxWidth().padding(bottom = 5.dp)
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(bottom = 5.dp)
                             ) {
                                 EventTypeButton("Social", selectedEventTypes)
                                 EventTypeButton("Business", selectedEventTypes)
@@ -159,50 +162,39 @@ fun SearchActivity(navController: NavController) {
             },
             content = {
                 CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr ) {
-                    Scaffold(
-                        topBar = {
-                            TopAppBar(
-                                title = {
-                                    OutlinedTextField(
-                                        value = searchQuery.value,
-                                        onValueChange = { searchQuery.value = it },
-                                        keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Search),
-                                        keyboardActions = KeyboardActions(onSearch = {
-                                            // Logic for searching the events goes here.
-                                        }),
-                                        shape = RoundedCornerShape(8.dp), // Rounded corners for the outline
-                                        singleLine = true, // Makes sure it's a single line text field
-                                        placeholder = { Text("Search ExploreCity Events...") },
-                                        leadingIcon = {
-                                            Icon(
-                                                imageVector = Icons.Default.Search,
-                                                contentDescription = "Search Icon"
-                                            )
-                                        },
-                                        trailingIcon = {
-                                            Icon(
-                                                imageVector = Icons.Default.Star,
-                                                contentDescription = "Filter Icon",
-                                                modifier = Modifier.clickable {
-                                                    coroutineScope.launch {
-                                                        drawerState.open()
-                                                    }
-                                                }
-                                            )
-                                        },
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .padding(10.dp)
-                                    )
-                                },
-                            )
-                        }
-                    ) { paddingValues ->
-                        // This is where the cards for events will appear after a search.
-                        // Use a LazyColumn for efficiency if expecting many cards.
-
-                        // Example card:
-                        LazyColumn(modifier = Modifier.padding(paddingValues)) {
+                    Column {
+                        OutlinedTextField(
+                            value = searchQuery.value,
+                            onValueChange = { searchQuery.value = it },
+                            keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Search),
+                            keyboardActions = KeyboardActions(onSearch = {
+                                // Logic for searching the events goes here.
+                            }),
+                            shape = RoundedCornerShape(8.dp), // Rounded corners for the outline
+                            singleLine = true, // Makes sure it's a single line text field
+                            placeholder = { Text("Search ExploreCity Events...") },
+                            leadingIcon = {
+                                Icon(
+                                    imageVector = Icons.Default.Search,
+                                    contentDescription = "Search Icon"
+                                )
+                            },
+                            trailingIcon = {
+                                Icon(
+                                    imageVector = Icons.Default.Star,
+                                    contentDescription = "Filter Icon",
+                                    modifier = Modifier.clickable {
+                                        coroutineScope.launch {
+                                            drawerState.open()
+                                        }
+                                    }
+                                )
+                            },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(10.dp)
+                        )
+                        LazyColumn(modifier = Modifier.padding(5.dp)) {
                             items(events) { event ->
                                 EventCard(event, onClick = {
                                     // This is a placeholder for navigating to the event details
@@ -211,6 +203,7 @@ fun SearchActivity(navController: NavController) {
                             }
                         }
                     }
+
                 }
             }
         )

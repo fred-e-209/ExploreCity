@@ -41,6 +41,7 @@ fun DetailsActivity(navBarController: NavController) {
     // Scrollable content since we don't know how long the description will be
     val event = DetailedEvent(
         date = "October 6, 2023",
+        startTime = "2:00 - 5:00",
         name = "Some Event",
         location =  Location("Some Address", "College Station", "TX"),
         eventType =  "Event Type",
@@ -143,6 +144,7 @@ fun DetailsActivity(navBarController: NavController) {
 }
 
 data class DetailedEvent(
+    val startTime: String,
     val date: String,
     val name: String,
     val location: Location,
