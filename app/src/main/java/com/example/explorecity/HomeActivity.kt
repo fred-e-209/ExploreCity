@@ -118,7 +118,7 @@ fun HomeActivity(navController: NavController, viewModel: ApiViewModel) {
                 composable("search") { SearchActivity(navController, viewModel) }
                 composable("explore") { ExploreActivity(navBarController) }
                 composable("profile") { ProfileActivity(navController)}
-                composable("details") { DetailsActivity(navBarController)}
+                composable("details") { DetailsActivity(navBarController, viewModel)}
         }
     }
 }

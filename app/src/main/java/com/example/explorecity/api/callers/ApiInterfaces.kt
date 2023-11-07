@@ -5,10 +5,13 @@ import com.example.explorecity.api.classes.auth.RegistrationBody
 import com.example.explorecity.api.classes.auth.RegistrationResponse
 import com.example.explorecity.api.classes.event.EventBody
 import com.example.explorecity.api.classes.event.EventListResponse
+import com.example.explorecity.api.classes.event.SingleEventResponse
 import retrofit2.Call
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST
+import retrofit2.http.Path
+
 
 interface ApiInterfaces {
     @GET("/auth")
@@ -22,4 +25,7 @@ interface ApiInterfaces {
 
     @POST("/event")
     suspend fun createNewEvent(@Body eventBody: EventBody): RegistrationResponse
+
+    @GET("/event/{id}")
+    suspend fun getSingleEvent(@Path("id") id: Int): SingleEventResponse
 }

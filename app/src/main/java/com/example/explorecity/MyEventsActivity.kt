@@ -33,6 +33,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.explorecity.api.classes.event.Hosting
 import com.example.explorecity.api.models.ApiViewModel
+import com.example.explorecity.api.models.EventStorage
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -46,6 +47,8 @@ fun MyEventsActivity(navController: NavController, viewModel: ApiViewModel) {
 //        Event("Month, Year- Time", "Event 2", "Address, City, State")
 //        // ... add more events
 //    )
+    val eventStorageInstance = EventStorage.instance
+
     val userEvents by viewModel.userEvents.observeAsState(emptyList())
 
     LaunchedEffect(Unit) {
@@ -66,6 +69,7 @@ fun MyEventsActivity(navController: NavController, viewModel: ApiViewModel) {
                 items(userEvents) { event ->
                     EventCard(event, onClick = {
                         // This is a placeholder for navigating to the event details
+                        eventStorageInstance.setEventID(event.id)
                         navController.navigate("details")
                     })
                 }
@@ -101,6 +105,3 @@ fun EventCard(event: Hosting, onClick: () -> Unit) {
         }
     }
 }
-
-
-data class Event(val date: String, val name: String, val location: String)

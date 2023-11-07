@@ -40,7 +40,7 @@ fun AppNavigator(viewModel: ApiViewModel) {
             EventCreationActivity(navController)
         }
         composable("event_details") {
-            DetailsActivity(navController)
+            DetailsActivity(navController, viewModel)
         }
     }
 }

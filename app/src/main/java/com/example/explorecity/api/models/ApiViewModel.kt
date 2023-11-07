@@ -17,29 +17,17 @@ import com.example.explorecity.api.classes.auth.RegistrationErrorResponse
 import com.example.explorecity.api.classes.auth.RegistrationResponse
 import com.example.explorecity.api.classes.event.EventBody
 import com.example.explorecity.api.classes.event.Hosting
+import com.example.explorecity.api.classes.event.SingleEventResponse
 import kotlinx.coroutines.delay
 import org.json.JSONArray
 import org.json.JSONException
 
 class ApiViewModel: ViewModel() {
-    private val repository = Repository()
-
-    private val _loginResponse = MutableLiveData<LoginValidResponse>()
-    val loginResponse: LiveData<LoginValidResponse> = _loginResponse
-
     private val _events = MutableLiveData<List<Hosting>>()
     val userEvents: LiveData<List<Hosting>> = _events
 
-    fun fetchLoginResponse() {
-        viewModelScope.launch {
-            try {
-                val response = repository.validateLogin()
-                _loginResponse.value = response
-            } catch (e: Exception) {
-                _loginResponse.value = LoginValidResponse(id = -1, verified = false)
-            }
-        }
-    }
+    private val _singleEvent = MutableLiveData<SingleEventResponse>()
+    val singleEvent: LiveData<SingleEventResponse> = _singleEvent
 
     suspend fun createNewAccount(user: RegistrationBody): Pair<Int, List<RegistrationErrorResponse>> {
 //        return try {
@@ -134,6 +122,17 @@ class ApiViewModel: ViewModel() {
             event.id
         } catch (e: Exception) {
             -1
+        }
+    }
+
+    fun fetchEvent(eventID: Int) {
+        viewModelScope.launch {
+            try {
+                val event = RetrofitInstance.authenticateUser().getSingleEvent(eventID)
+                _singleEvent.value = event
+            } catch (e: Exception) {
+                throw e
+            }
         }
     }
 }
