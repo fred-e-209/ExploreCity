@@ -1,5 +1,6 @@
 package com.example.explorecity
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -135,11 +136,12 @@ fun GoogleMapsView(navController: NavController) {
             snippet = "Time: 8:00 pm"
         )
         MarkerInfoWindow(
-            state = MarkerState(position = LatLng(30.610657, -96.340695))
-            /*onInfoWindowClick = {
+            state = MarkerState(position = LatLng(30.610657, -96.340695)),
+            onInfoWindowClick = {
                 // Handle the click event
+                Log.d("MAPS", "User clicked details")
                 navController.navigate("details")
-            }*/
+            }
 
         ) { marker ->
             Box(

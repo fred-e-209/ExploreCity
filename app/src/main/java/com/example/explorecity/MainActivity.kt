@@ -28,10 +28,10 @@ fun AppNavigator(viewModel: ApiViewModel) {
             AccountCreationActivity(navController)
         }
         composable("home") {
-            HomeActivity(navController)
+            HomeActivity(navController, viewModel)
         }
         composable("host_home") {
-            HostActivity(navController)
+            HostActivity(navController, viewModel)
         }
         composable("host_prof") {
             HostProfileActivity(navController)

@@ -21,22 +21,36 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.example.explorecity.api.classes.event.Hosting
+import com.example.explorecity.api.models.ApiViewModel
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+
 @SuppressLint("UnrememberedMutableState")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MyEventsActivity(navController: NavController) {
+fun MyEventsActivity(navController: NavController, viewModel: ApiViewModel) {
 
-    val events = mutableStateListOf(
-        Event("Month, Year- Time", "Event 1", "Address, City, State"),
-        Event("Month, Year- Time", "Event 2", "Address, City, State")
-        // ... add more events
-    )
+//    val events = mutableStateListOf(
+//        Event("Month, Year- Time", "Event 1", "Address, City, State"),
+//        Event("Month, Year- Time", "Event 2", "Address, City, State")
+//        // ... add more events
+//    )
+    val userEvents by viewModel.userEvents.observeAsState(emptyList())
+
+    LaunchedEffect(Unit) {
+        viewModel.fetchUserEvents()
+    }
 
     Scaffold(
         topBar = {
@@ -49,7 +63,7 @@ fun MyEventsActivity(navController: NavController) {
             }
         }, content = {paddingValues ->
             LazyColumn (modifier = Modifier.padding(paddingValues)){
-                items(events) { event ->
+                items(userEvents) { event ->
                     EventCard(event, onClick = {
                         // This is a placeholder for navigating to the event details
                         navController.navigate("details")
@@ -62,7 +76,7 @@ fun MyEventsActivity(navController: NavController) {
 }
 
 @Composable
-fun EventCard(event: Event, onClick: () -> Unit) {
+fun EventCard(event: Hosting, onClick: () -> Unit) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -79,9 +93,7 @@ fun EventCard(event: Event, onClick: () -> Unit) {
             Column (
                 modifier = Modifier.weight(1f) // This ensures that the column takes up as much space as possible
             ){
-                Text(event.date)
-                Text(event.name, fontWeight = FontWeight.Bold)
-                Text(event.location)
+                Text(event.displayname, fontWeight = FontWeight.Bold)
             }
             Spacer(modifier = Modifier.width(16.dp)) // Space between text and icon
 

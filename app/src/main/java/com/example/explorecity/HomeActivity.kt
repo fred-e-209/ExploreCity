@@ -37,6 +37,7 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.explorecity.api.models.ApiViewModel
 
 data class BottomNavigationItem(
     val route: String,
@@ -49,7 +50,7 @@ data class BottomNavigationItem(
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeActivity(navController: NavController) {
+fun HomeActivity(navController: NavController, viewModel: ApiViewModel) {
     val items = listOf(
         BottomNavigationItem(
             title = "My Events",
@@ -113,8 +114,8 @@ fun HomeActivity(navController: NavController) {
             }
         ) {
             NavHost(navBarController, startDestination = "events") {
-                composable("events") { MyEventsActivity(navBarController) }
-                composable("search") { SearchActivity(navController) }
+                composable("events") { MyEventsActivity(navBarController, viewModel) }
+                composable("search") { SearchActivity(navController, viewModel) }
                 composable("explore") { ExploreActivity(navBarController) }
                 composable("profile") { ProfileActivity(navController)}
                 composable("details") { DetailsActivity(navBarController)}

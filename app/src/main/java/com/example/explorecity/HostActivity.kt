@@ -17,24 +17,40 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.MutableLiveData
 import androidx.navigation.NavController
+import com.example.explorecity.api.classes.event.Hosting
+import com.example.explorecity.api.models.ApiViewModel
 import com.example.explorecity.ui.theme.DarkBlue
+import kotlinx.coroutines.launch
 
 @SuppressLint("UnrememberedMutableState")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HostActivity (navController: NavController) {
-    val events = mutableStateListOf(
-        Event("Month, Year- Time", "Event 1", "Address, City, State"),
-        Event("Month, Year- Time", "Event 2", "Address, City, State")
-        // ... add more events
-    )
+fun HostActivity (navController: NavController, viewModel: ApiViewModel) {
+//    val events = mutableStateListOf(
+//        Event("Month, Year- Time", "Event 1", "Address, City, State"),
+//        Event("Month, Year- Time", "Event 2", "Address, City, State")
+//        // ... add more events
+//    )
+
+
+    val userEvents by viewModel.userEvents.observeAsState(emptyList())
+
+    LaunchedEffect(Unit) {
+        viewModel.fetchUserEvents()
+    }
 
     Scaffold(topBar = {
         Surface(shadowElevation = 10.dp, color = DarkBlue) {
@@ -65,7 +81,7 @@ fun HostActivity (navController: NavController) {
     }
         , content = {paddingValues ->
         LazyColumn (modifier = androidx.compose.ui.Modifier.padding(paddingValues)){
-            items(events) { event ->
+            items(userEvents) { event ->
                 EventCard(event, onClick = {
                     // This is a placeholder for navigating to the event details
                     navController.navigate("details")

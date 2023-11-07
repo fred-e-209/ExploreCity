@@ -36,7 +36,9 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -53,6 +55,8 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.example.explorecity.api.classes.event.Hosting
+import com.example.explorecity.api.models.ApiViewModel
 import com.example.explorecity.ui.theme.DarkBlue
 import kotlinx.coroutines.launch
 import java.util.Date
@@ -60,21 +64,27 @@ import java.util.Date
 @SuppressLint("UnrememberedMutableState")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SearchActivity(navController: NavController) {
+fun SearchActivity(navController: NavController, viewModel: ApiViewModel) {
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val searchQuery = remember { mutableStateOf("") }
 
-    val events = mutableStateListOf(
-        Event("Month, Year- Time", "Event 1", "Address, City, State"),
-        Event("Month, Year- Time", "Event 2", "Address, City, State")
-        // ... add more events
-    )
+//    val events = mutableStateListOf(
+//        Event("Month, Year- Time", "Event 1", "Address, City, State"),
+//        Event("Month, Year- Time", "Event 2", "Address, City, State")
+//        // ... add more events
+//    )
 
     val coroutineScope = rememberCoroutineScope()
     var startDate by remember { mutableStateOf(Date()) }
     var endDate by remember { mutableStateOf(Date()) }
     val selectedEventTypes = mutableStateListOf<String>()
     var selectedDistance by remember { mutableStateOf("") }
+
+    val userEvents by viewModel.userEvents.observeAsState(emptyList())
+
+    LaunchedEffect(Unit) {
+        viewModel.fetchUserEvents()
+    }
 
     CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl ) {
         ModalNavigationDrawer(
@@ -203,7 +213,7 @@ fun SearchActivity(navController: NavController) {
 
                         // Example card:
                         LazyColumn(modifier = Modifier.padding(paddingValues)) {
-                            items(events) { event ->
+                            items(userEvents) { event ->
                                 EventCard(event, onClick = {
                                     // This is a placeholder for navigating to the event details
                                     navController.navigate("details")
