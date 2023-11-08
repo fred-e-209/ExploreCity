@@ -37,6 +37,7 @@ import androidx.compose.ui.unit.dp
 import com.example.explorecity.ui.theme.DarkBlue
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.navigation.NavController
+import com.example.explorecity.api.models.UserInformation
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.MapView
@@ -121,19 +122,19 @@ fun ExploreActivity(navController: NavController) {
 
 @Composable
 fun GoogleMapsView(navController: NavController) {
-    val collegeStation = LatLng(30.627977, -96.334406)
+    val userInfoInstance = UserInformation.instance
+    val currentLocation = LatLng(userInfoInstance.getUserLocation().lat, userInfoInstance.getUserLocation().lon)
     val cameraPositionState = rememberCameraPositionState {
-        position = CameraPosition.fromLatLngZoom(collegeStation, 14.5f)
+        position = CameraPosition.fromLatLngZoom(currentLocation, 14.5f)
     }
     GoogleMap(
         modifier = Modifier.fillMaxSize(),
         cameraPositionState = cameraPositionState
     ) {
         Marker(
-            state = rememberMarkerState(position = collegeStation),
+            state = rememberMarkerState(position = currentLocation),
             draggable = true,
-            title = "Cstat",
-            snippet = "Time: 8:00 pm"
+            title = "Your Location"
         )
         MarkerInfoWindow(
             state = MarkerState(position = LatLng(30.610657, -96.340695)),
@@ -171,12 +172,6 @@ fun GoogleMapsView(navController: NavController) {
         }
     }
 }
-
-
-
-
-
-
 
 
 @Composable

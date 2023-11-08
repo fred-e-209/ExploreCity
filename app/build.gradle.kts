@@ -7,6 +7,7 @@ android {
     namespace = "com.example.explorecity"
     compileSdk = 34
 
+
     defaultConfig {
         applicationId = "com.example.explorecity"
         minSdk = 26
@@ -82,5 +83,8 @@ dependencies {
 
     // Coroutines for asynchronous programming
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
+
+    // User Location
+    implementation("com.google.android.gms:play-services-location:19.0.1")
 
 }

@@ -1,5 +1,7 @@
 package com.example.explorecity.api.models
 
+import com.example.explorecity.api.classes.event.Location
+
 class UserInformation {
     companion object {
         val instance: UserInformation by lazy {
@@ -7,6 +9,8 @@ class UserInformation {
         }
         var username = ""
         var password = ""
+
+        var userLocation = Location(lat = 0.0, lon = 0.0)
     }
 
     fun getUsername() = username
@@ -19,5 +23,13 @@ class UserInformation {
 
     fun setPassword(input: String) {
         password = input
+    }
+
+    fun setUserLocation(lat: Double, lon: Double) {
+        userLocation = Location(lat = lat, lon = lon)
+    }
+
+    fun getUserLocation(): Location {
+        return userLocation
     }
 }

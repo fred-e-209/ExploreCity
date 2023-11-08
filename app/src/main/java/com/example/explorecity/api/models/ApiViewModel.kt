@@ -29,6 +29,11 @@ class ApiViewModel: ViewModel() {
     private val _singleEvent = MutableLiveData<SingleEventResponse>()
     val singleEvent: LiveData<SingleEventResponse> = _singleEvent
 
+    suspend fun updateUserLocation(lat: Double, lon: Double) {
+        val userInfoInstance = UserInformation.instance
+        userInfoInstance.setUserLocation(lat = lat, lon = lon)
+    }
+
     suspend fun createNewAccount(user: RegistrationBody): Pair<Int, List<RegistrationErrorResponse>> {
 //        return try {
 //            val newUser = RetrofitInstance.registerService().registerUser(user) // Repository call
