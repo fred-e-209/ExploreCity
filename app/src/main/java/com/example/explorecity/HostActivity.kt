@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
@@ -93,19 +94,21 @@ fun HostActivity (navController: NavController) {
         },
         content=  {
             Scaffold(topBar = {
-                Surface(shadowElevation = 10.dp, color = DarkBlue) {
                     TopAppBar(
                         title = {
-                            Text(
-                                "My Events",
-                                textAlign = TextAlign.Center,
-                                fontWeight = FontWeight.ExtraBold
-                            )
+                            Box (modifier = Modifier.fillMaxWidth()){
+                                Text(
+                                    "My Events",
+                                    fontWeight = FontWeight.ExtraBold,
+                                    color = Color.White
+                                )
+                            }
                         },
                         navigationIcon = {
                             IconButton(onClick = { navController.navigate("host_prof") }) {
                                 Icon(Icons.Default.AccountCircle,
                                     contentDescription = "Profile",
+                                    tint = Color.White,
                                     modifier = Modifier.clickable {
                                         coroutineScope.launch {
                                             drawerState.open()
@@ -116,16 +119,16 @@ fun HostActivity (navController: NavController) {
                         actions = {
                             Spacer(Modifier.weight(1f)) // This pushes the following icons to the right
                             IconButton(onClick = { navController.navigate("create_event") }) {
-                                Icon(Icons.Default.Add, contentDescription = "Add Event")
+                                Icon(Icons.Default.Add,
+                                    contentDescription = "Add Event",
+                                    tint = Color.White,
+                                )
                             }
                         },
                         colors = TopAppBarDefaults.largeTopAppBarColors(
                             containerColor = DarkBlue,
-                            titleContentColor = Color.White,
-                        ),
+                        ),)
 
-                        )
-                }
             }, content = { paddingValues ->
                 LazyColumn(modifier = Modifier.padding(paddingValues)) {
                     items(events) { event ->

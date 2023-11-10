@@ -1,159 +1,453 @@
 package com.example.explorecity
 
+import android.widget.Button
+import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Call
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Place
-import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonColors
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.RadioButton
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.unit.max
 import androidx.navigation.NavController
+import com.example.explorecity.ui.theme.DarkBlue
+import java.text.ParseException
+import java.text.SimpleDateFormat
+import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DetailsActivity(navBarController: NavController) {
     // Scrollable content since we don't know how long the description will be
-    val event = DetailedEvent(
-        date = "October 6, 2023",
-        startTime = "2:00 - 5:00",
+    var showConfirmDialog by remember { mutableStateOf(false) }
+    var dialogMessage by remember { mutableStateOf("") }
+
+
+    var event by remember {mutableStateOf(DetailedEvent(
+        startDate = "11-8-2023",
+        startTime = "2:00",
+        endDate = "11-12-2023",
+        endTime = "5:00",
         name = "Some Event",
-        location =  Location("Some Address", "College Station", "TX"),
+        host = "Some guy",
+        location =  "Some Address,College Station,TX",
         eventType =  "Event Type",
         description =  "This is where the description of the event will be located. It will include" +
                 " all additional information the host wants to add. We should probably add a character limit " +
-                "or something. "
+                "or something. ",
+        attending = false,
+        hosting = false,
+        ))}
+
+    // The following state could come from a ViewModel or be passed down to this composable
+    val isFollowing = event.attending // This should be a state that triggers recompositions when changed
+
+    // Use animateFloatAsState to animate the weight changes
+    val followButtonWeight by animateFloatAsState(if (isFollowing) 1f else 3f)
+    val chatButtonWeight by animateFloatAsState(if (isFollowing) 3f else 1f)
+
+
+    val toggleFollow = {
+        event = event.copy(attending = !event.attending)
+        dialogMessage = if (event.attending) {
+            "You are now following ${event.name}"
+        } else {
+            "You are no longer following ${event.name}"
+        }
+        showConfirmDialog = true
+    }
+
+    Row (horizontalArrangement = Arrangement.SpaceBetween) {
+        Icon(
+            Icons.Default.ArrowBack,
+            contentDescription = "Back",
+            modifier = Modifier.clickable(
+                onClick = { navBarController.navigate("events") })
         )
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .verticalScroll(rememberScrollState())
-            .padding(16.dp)
-    ) {
+        Icon(
+            Icons.Default.MoreVert,
+            contentDescription = "More Options",
+            modifier = Modifier.clickable(
+                onClick = { navBarController.navigate("events") })
+        )
+    }
 
-        Icon(Icons.Default.ArrowBack, contentDescription = "Back", modifier = Modifier.clickable(onClick = { navBarController.navigate("events") }))
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        // Event time and title card
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            elevation = CardDefaults.cardElevation(
-                defaultElevation = 10.dp
-                )
-        ) {
-            Column(modifier = Modifier.padding(16.dp)) {
-                Text(text = event.date, style = TextStyle(color = Color.Gray))
-                Spacer(modifier = Modifier.height(4.dp))
-                Text(text = event.name, style = TextStyle(
-                    fontWeight = FontWeight.ExtraBold,
-                    fontSize = 36.sp
-                )
-                )
-            }
-        }
-
-        Spacer(modifier = Modifier.height(5.dp))
-
-        // Follow and Chat buttons
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Button(onClick = { /* Follow logic */ }, modifier = Modifier.weight(20f)) {
-                Text("Follow")
-            }
-            Spacer(modifier = Modifier.weight(1f))
-            Button(onClick = { /* Navigate to chat room */ }, modifier = Modifier.weight(20f)) {
-                Icon(Icons.Default.Search, contentDescription = "Chat")
-                Spacer(modifier = Modifier.width(4.dp))
-                Text("Chat")
-            }
-        }
-
-        Spacer(modifier = Modifier.height(5.dp))
-
-        // Event details card
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            elevation =  CardDefaults.cardElevation(
-                defaultElevation = 10.dp
+    Scaffold (
+        topBar = {
+            TopAppBar(title = {Text(text = "")},
+                navigationIcon = {
+                    Icon(
+                        Icons.Default.ArrowBack,
+                        contentDescription = "Back",
+                        modifier = Modifier.clickable(
+                            onClick = { navBarController.navigate("events") })
+                    )
+                }, actions = {ReportEventOption()}
             )
+        }
+    ){paddingValues->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+                .padding(paddingValues)
+                .padding(horizontal = 15.dp)
         ) {
-            Column(modifier = Modifier.padding(16.dp)) {
-                // Location with icon
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.Start
+            // Event time and title card
+            Spacer(modifier = Modifier.height(5.dp))
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .border(
+                        width = 1.dp,
+                        color = DarkBlue, // Replace with your desired color
+                        shape = RoundedCornerShape(size = 15.dp) // Match this with your Card's corner shape if any
+                    ),
+                elevation = CardDefaults.cardElevation(
+                    defaultElevation = 10.dp
+                )
+            ) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Text(
+                        text = event.name, style = TextStyle(
+                            fontWeight = FontWeight.ExtraBold,
+                            fontSize = 36.sp,
+                            color= DarkBlue,
+                        )
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(text = "Hosted by ${event.host}", style = TextStyle(color = Color.Gray))
+                }
+            }
+
+            Spacer(modifier = Modifier.height(5.dp))
+
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                // Follow Button
+                Button(
+                    onClick = toggleFollow,
+                    modifier = Modifier
+                        .weight(followButtonWeight)
+                        .animateContentSize(
+                            animationSpec = spring(
+                                dampingRatio = Spring.DampingRatioLowBouncy,
+                                stiffness = Spring.StiffnessLow
+                            )
+                        ),
+                    colors = if (isFollowing) ButtonDefaults.buttonColors(containerColor = Color.Red) else ButtonDefaults.buttonColors(containerColor = DarkBlue)
                 ) {
-                    Icon(Icons.Default.Place, contentDescription = "Location")
-                    Spacer(modifier = Modifier.width(10.dp))
-                    Column {
-                        Text(event.location.address)
-                        Text("${event.location.city}, ${event.location.state}")
+                    if (isFollowing) {
+                        Icon(Icons.Default.ExitToApp, contentDescription = "Unfollow")
+                    } else {
+                        Text(text="Follow", maxLines = 1)
                     }
                 }
 
-                Spacer(modifier = Modifier.height(24.dp))
+                Spacer(modifier = Modifier.weight(0.1f)) // This will keep the buttons apart
 
-                // Event type with icon
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.Start
+                // Chat Button
+                Button(
+                    onClick = { /* Navigate to chat room if isFollowing, otherwise do nothing */ },
+                    modifier = Modifier
+                        .weight(chatButtonWeight)
+                        .animateContentSize(
+                            animationSpec = spring(
+                                dampingRatio = Spring.DampingRatioNoBouncy,
+                                stiffness = Spring.StiffnessHigh
+                            )
+                        ),
+                    enabled = isFollowing,
+                    colors = if (isFollowing) ButtonDefaults.buttonColors(containerColor = DarkBlue) else ButtonDefaults.buttonColors(containerColor = Color.LightGray)
                 ) {
-                    // Replace with appropriate icon for event type
-                    Icon(Icons.Default.CheckCircle, contentDescription = "Event Type")
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(event.eventType)
+                    if (isFollowing) {
+                        Text("Chat", maxLines = 1)
+                    } else {
+                        Icon(painterResource(R.drawable.ic_chat), contentDescription = "Chat Disabled", tint = Color.Gray)
+                    }
                 }
+            }
 
-                Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(5.dp))
 
-                // Event description
-                Text("About this Event", fontWeight = FontWeight.Bold)
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(event.description)
+
+            // Event details card
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth(),
+                elevation = CardDefaults.cardElevation(
+                    defaultElevation = 10.dp
+                )
+            ) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    // Location with icon
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Start
+                    ) {
+                        Icon(Icons.Default.Place, contentDescription = "Location", tint = DarkBlue)
+                        Spacer(modifier = Modifier.width(10.dp))
+                        val parsedLocation = event.location.split(',')
+
+                        Column {
+                            if (parsedLocation.size == 3) {
+                                Text(parsedLocation[0])
+                                Text("${parsedLocation[1]}, ${parsedLocation[2]}")
+                            } else {
+                                Text(event.location)
+                            }
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(24.dp))
+
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Start
+                    ) {
+                        // Replace with appropriate icon for event type
+                        Icon(
+                            painterResource(R.drawable.ic_calendar),
+                            tint = DarkBlue,
+                            contentDescription = "Event Duration"
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Column {
+                            val startDate = formatDate(event.startDate)
+                            val endDate = formatDate(event.endDate)
+                            Text(text = if (startDate != endDate) "$startDate to $endDate" else startDate)
+                            Text("${formatTime(event.startTime)} - ${formatTime(event.endTime)}")
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(24.dp))
+
+                    // Event type with icon
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Start
+                    ) {
+                        // Replace with appropriate icon for event type
+                        Icon(
+                            Icons.Default.CheckCircle,
+                            contentDescription = "Event Type",
+                            tint = DarkBlue,
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(event.eventType)
+                    }
+
+                    Spacer(modifier = Modifier.height(24.dp))
+
+                    // Event description
+                    Text("About this Event", fontWeight = FontWeight.Bold)
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(event.description)
+
+                    Spacer(modifier = Modifier.height(24.dp))
+
+                }
             }
         }
     }
+    if (showConfirmDialog) {
+        AlertDialog(
+            onDismissRequest = { showConfirmDialog = false },
+            text = { Text(dialogMessage) },
+            confirmButton = {
+                Button(onClick = { showConfirmDialog = false }) {
+                    Text("Dismiss")
+                }
+            },
+            containerColor = Color.White,
+        )
+    }
 }
 
-data class DetailedEvent(
-    val startTime: String,
-    val date: String,
-    val name: String,
-    val location: Location,
-    val eventType: String,
-    val description: String
-)
 
-data class Location(
-    val address: String,
-    val city: String,
-    val state: String
-)
+/*TODO: Pass event name (or ID?) to send the report*/
+@Composable
+fun ReportEventOption() {
+    var expanded by remember { mutableStateOf(false) }
+    var showDialog by remember { mutableStateOf(false) }
+    var showConfirmDialog by remember { mutableStateOf(false) }
+    var selectedOption by remember { mutableStateOf<String?>(null) }
+
+    // Options for reporting the event
+    val reportOptions = listOf("Fake Event", "Inappropriate Content", "Technical Issues", "Other")
+    var response = "A Report has been sent to the ExploreCity Team."
+
+    // More options icon
+    IconButton(onClick = { expanded = true }) {
+        Icon(Icons.Default.MoreVert, contentDescription = "More options")
+    }
+
+    // Dropdown menu
+    DropdownMenu(
+        expanded = expanded,
+        onDismissRequest = { expanded = false }
+    ) {
+        DropdownMenuItem(
+            text = { Text("Report this event") },
+            onClick = {
+                expanded = false
+                showDialog = true
+            }
+        )
+    }
+
+    // Show the dialog for reporting
+    if (showDialog) {
+        AlertDialog(
+            onDismissRequest = { showDialog = false },
+            title = { Text("Report a problem") },
+            text = {
+                Column {
+                    Text("Select the problem with the event:", modifier= Modifier.padding(bottom = 5.dp))
+                    reportOptions.forEach { text ->
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .selectable(
+                                    selected = (text == selectedOption),
+                                    onClick = { selectedOption = text }
+                                )
+                                .padding(horizontal = 16.dp)
+                        ) {
+                            RadioButton(
+                                selected = (text == selectedOption),
+                                onClick = { selectedOption = text }
+                            )
+                            Text(text = text, style = MaterialTheme.typography.bodyMedium)
+                        }
+                    }
+                }
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        showDialog = false
+                        /*TODO: Send a report to the database
+                            - The String selected will contain the report type
+                            - Change condition to depend on whether the report is successful
+                         */
+                        if (true){
+                            response = "There was an issue sending a response."
+                        }
+                        showConfirmDialog = true // Show confirmation after the report dialog
+                    }
+                ) {
+                    Text("Confirm")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDialog = false }) {
+                    Text("Cancel")
+                }
+            }
+        )
+    }
+
+    // Show confirmation dialog
+    if (showConfirmDialog) {
+        AlertDialog(
+            onDismissRequest = { showConfirmDialog = false },
+            title = { Text("Report Submitted") },
+            text = { Text(response) },
+            confirmButton = {
+                Button(
+                    onClick = { showConfirmDialog = false }
+                ) {
+                    Text("Dismiss")
+                }
+            }
+        )
+    }
+}
+
+fun formatDate(inputDate: String): String {
+    val inputFormat = SimpleDateFormat("MM-dd-yyyy", Locale.getDefault())
+    val outputFormat = SimpleDateFormat("MMM d, yyyy", Locale.getDefault())
+
+    // Parse the input date
+    val parsedDate = inputFormat.parse(inputDate)
+
+    // Format the date into the new format
+    return if (parsedDate != null) {
+        outputFormat.format(parsedDate)
+    } else {
+        "Invalid date" // Handle this as you find suitable
+    }
+}
+
+fun formatTime(inputTime: String): String {
+    val inputFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
+    val outputFormat = SimpleDateFormat("h:mm a", Locale.getDefault())
+
+    return try {
+        val parsedDate = inputFormat.parse(inputTime)
+        outputFormat.format(parsedDate)
+    } catch (e: ParseException) {
+        "Invalid time" // Handle invalid time format
+    }
+}
+
+
+
+

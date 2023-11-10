@@ -39,6 +39,8 @@ fun AppNavigator() {
         composable("event_details") {
             DetailsActivity(navController)
         }
+        composable("details") { DetailsActivity(navController)}
+
     }
 }
 

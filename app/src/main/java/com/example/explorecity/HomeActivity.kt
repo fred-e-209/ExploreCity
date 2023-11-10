@@ -122,3 +122,24 @@ fun HomeActivity(navController: NavController) {
     }
 }
 }
+
+
+/* TEMPORARY OBJECTS
+*  TODO: Replace with a version that works with the database
+*
+
+* */
+
+data class DetailedEvent(
+    val host: String,
+    val name: String,
+    val startTime: String,
+    val endTime: String,
+    val startDate: String,
+    val endDate: String,
+    val location: String,
+    val eventType: String,
+    val description: String,
+    var attending: Boolean,
+    val hosting: Boolean,
+)
