@@ -39,8 +39,15 @@ fun AppNavigator() {
         composable("event_details") {
             DetailsActivity(navController)
         }
-        composable("details") { DetailsActivity(navController)}
-
+        composable("details") {
+            DetailsActivity(navController)
+        }
+        composable("questions") {
+            CommonQuestions(navController)
+        }
+        composable("account") {
+            ProfileDetails(navController)
+        }
     }
 }
 
