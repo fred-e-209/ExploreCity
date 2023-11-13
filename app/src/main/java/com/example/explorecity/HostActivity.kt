@@ -20,20 +20,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.MutableLiveData
 import androidx.navigation.NavController
-import com.example.explorecity.api.classes.event.Hosting
 import com.example.explorecity.api.models.ApiViewModel
 import com.example.explorecity.ui.theme.DarkBlue
-import kotlinx.coroutines.launch
 
 @SuppressLint("UnrememberedMutableState")
 @OptIn(ExperimentalMaterial3Api::class)
@@ -46,10 +40,10 @@ fun HostActivity (navController: NavController, viewModel: ApiViewModel) {
 //    )
 
 
-    val userEvents by viewModel.userEvents.observeAsState(emptyList())
+    val hostEvents by viewModel.userEvents.observeAsState(emptyList())
 
     LaunchedEffect(Unit) {
-        viewModel.fetchUserEvents()
+        viewModel.fetchHostEvents()
     }
 
     Scaffold(topBar = {
@@ -81,11 +75,11 @@ fun HostActivity (navController: NavController, viewModel: ApiViewModel) {
     }
         , content = {paddingValues ->
         LazyColumn (modifier = androidx.compose.ui.Modifier.padding(paddingValues)){
-            items(userEvents) { event ->
-                EventCard(event, onClick = {
+            items(hostEvents) { event ->
+                EventCard(event) {
                     // This is a placeholder for navigating to the event details
                     navController.navigate("details")
-                })
+                }
             }
         }
     })

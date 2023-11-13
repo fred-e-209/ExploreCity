@@ -9,7 +9,9 @@ import com.example.explorecity.api.classes.event.SingleEventResponse
 import retrofit2.Call
 import retrofit2.http.Body
 import retrofit2.http.GET
+import retrofit2.http.PATCH
 import retrofit2.http.POST
+import retrofit2.http.PUT
 import retrofit2.http.Path
 
 
@@ -28,4 +30,7 @@ interface ApiInterfaces {
 
     @GET("/event/{id}")
     suspend fun getSingleEvent(@Path("id") id: Int): SingleEventResponse
+
+    @PUT("/event/{eventID}/user/{userID}")
+    suspend fun addUserToEvent(@Path("eventID") eventID: Int, @Path("userID") userID: Int)
 }

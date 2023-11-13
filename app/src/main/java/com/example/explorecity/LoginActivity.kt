@@ -131,6 +131,7 @@ fun LoginActivity(navController: NavController, apiVM: ApiViewModel) {
                         var loginResponse = ApiViewModel().isLoginValid()
                         if (loginResponse > 0) {
                             // Logic for successful login
+                            userInfo.setUserID(loginResponse)
                             toastMessage = "Login successful!"
                             navController.navigate("home")
                         } else {

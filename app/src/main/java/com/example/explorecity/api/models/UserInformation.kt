@@ -9,6 +9,7 @@ class UserInformation {
         }
         var username = ""
         var password = ""
+        var userID = -1
 
         var userLocation = Location(lat = 0.0, lon = 0.0)
     }
@@ -23,6 +24,12 @@ class UserInformation {
 
     fun setPassword(input: String) {
         password = input
+    }
+
+    fun getUserID() = userID
+
+    fun setUserID(input: Int) {
+        userID = input
     }
 
     fun setUserLocation(lat: Double, lon: Double) {

@@ -1,11 +1,16 @@
 package com.example.explorecity.api.classes.event
 
+import com.example.explorecity.api.classes.User.SingleUserDetail
+
 data class SingleEventResponse(
-    val attendees: List<Any>,
+    val attendees: List<SingleUserDetail>,
     val attending: Boolean,
     val description: String,
     val displayname: String,
-    val location: Location
+    val end: DateTimeBody,
+    val host: SingleUserDetail,
+    val location: Location,
+    val start: DateTimeBody
 )
 
 fun emptySingleEventResponse(): SingleEventResponse {
@@ -14,6 +19,9 @@ fun emptySingleEventResponse(): SingleEventResponse {
         attending = false,
         description = "",
         displayname = "",
-        location = Location(0.0, 0.0)
+        end = DateTimeBody(-1, -1, -1, -1, -1),
+        host = SingleUserDetail("", -1, ""),
+        location = Location(0.0, 0.0),
+        start = DateTimeBody(-1, -1, -1, -1, -1)
     )
 }

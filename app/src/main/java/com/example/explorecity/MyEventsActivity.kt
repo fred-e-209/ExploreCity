@@ -24,17 +24,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.example.explorecity.api.classes.event.Hosting
+import com.example.explorecity.api.classes.event.EventDetailBody
 import com.example.explorecity.api.models.ApiViewModel
 import com.example.explorecity.api.models.EventStorage
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @SuppressLint("UnrememberedMutableState")
@@ -67,11 +64,11 @@ fun MyEventsActivity(navController: NavController, viewModel: ApiViewModel) {
         }, content = {paddingValues ->
             LazyColumn (modifier = Modifier.padding(paddingValues)){
                 items(userEvents) { event ->
-                    EventCard(event, onClick = {
+                    EventCard(event) {
                         // This is a placeholder for navigating to the event details
                         eventStorageInstance.setEventID(event.id)
                         navController.navigate("details")
-                    })
+                    }
                 }
             }
         }
@@ -80,7 +77,7 @@ fun MyEventsActivity(navController: NavController, viewModel: ApiViewModel) {
 }
 
 @Composable
-fun EventCard(event: Hosting, onClick: () -> Unit) {
+fun EventCard(event: EventDetailBody, onClick: () -> Unit) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -98,6 +95,9 @@ fun EventCard(event: Hosting, onClick: () -> Unit) {
                 modifier = Modifier.weight(1f) // This ensures that the column takes up as much space as possible
             ){
                 Text(event.displayname, fontWeight = FontWeight.Bold)
+                Text(event.description)
+                Text(event.start.toString())
+                Text(event.end.toString())
             }
             Spacer(modifier = Modifier.width(16.dp)) // Space between text and icon
 

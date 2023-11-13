@@ -5,6 +5,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.explorecity.api.callers.RetrofitInstance
 import com.example.explorecity.api.classes.auth.LoginValidResponse
 import com.example.explorecity.api.classes.auth.RegistrationBody
@@ -16,6 +17,7 @@ import retrofit2.Response
 import com.example.explorecity.api.classes.auth.RegistrationErrorResponse
 import com.example.explorecity.api.classes.auth.RegistrationResponse
 import com.example.explorecity.api.classes.event.EventBody
+import com.example.explorecity.api.classes.event.EventDetailBody
 import com.example.explorecity.api.classes.event.Hosting
 import com.example.explorecity.api.classes.event.SingleEventResponse
 import kotlinx.coroutines.delay
@@ -23,8 +25,8 @@ import org.json.JSONArray
 import org.json.JSONException
 
 class ApiViewModel: ViewModel() {
-    private val _events = MutableLiveData<List<Hosting>>()
-    val userEvents: LiveData<List<Hosting>> = _events
+    private val _events = MutableLiveData<List<EventDetailBody>>()
+    val userEvents: LiveData<List<EventDetailBody>> = _events
 
     private val _singleEvent = MutableLiveData<SingleEventResponse>()
     val singleEvent: LiveData<SingleEventResponse> = _singleEvent
@@ -101,16 +103,19 @@ class ApiViewModel: ViewModel() {
         }
     }
 
-    suspend fun getUserEvents(): List<Hosting> {
-        return try {
-            val userEvents = RetrofitInstance.authenticateUser().getUserEvents()
-            userEvents.hosting
-        } catch (e: Exception) {
-            emptyList()
+
+    fun fetchUserEvents() {
+        viewModelScope.launch {
+            try {
+                val userEvents = RetrofitInstance.authenticateUser().getUserEvents()
+                _events.value = userEvents.attending
+            } catch (e: Exception) {
+                _events.value = emptyList()
+            }
         }
     }
 
-    fun fetchUserEvents() {
+    fun fetchHostEvents() {
         viewModelScope.launch {
             try {
                 val userEvents = RetrofitInstance.authenticateUser().getUserEvents()
@@ -138,6 +143,14 @@ class ApiViewModel: ViewModel() {
             } catch (e: Exception) {
                 throw e
             }
+        }
+    }
+
+    suspend fun addUserToEvent(eventID: Int, userID: Int): Unit {
+        return try {
+            RetrofitInstance.authenticateUser().addUserToEvent(eventID = eventID, userID = userID)
+        } catch (e: Exception) {
+            e.printStackTrace()
         }
     }
 }

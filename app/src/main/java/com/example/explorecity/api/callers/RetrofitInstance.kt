@@ -36,6 +36,4 @@ object RetrofitInstance {
     fun registerService(): ApiInterfaces {
         return baseRequestWithoutAuthentication().create(ApiInterfaces::class.java)
     }
-
-
 }

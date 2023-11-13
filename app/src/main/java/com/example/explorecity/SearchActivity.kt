@@ -4,7 +4,6 @@ import android.annotation.SuppressLint
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -31,7 +30,6 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
@@ -55,7 +53,6 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import com.example.explorecity.api.classes.event.Hosting
 import com.example.explorecity.api.models.ApiViewModel
 import com.example.explorecity.ui.theme.DarkBlue
 import kotlinx.coroutines.launch
@@ -214,10 +211,10 @@ fun SearchActivity(navController: NavController, viewModel: ApiViewModel) {
                         // Example card:
                         LazyColumn(modifier = Modifier.padding(paddingValues)) {
                             items(userEvents) { event ->
-                                EventCard(event, onClick = {
+                                EventCard(event) {
                                     // This is a placeholder for navigating to the event details
                                     navController.navigate("details")
-                                })
+                                }
                             }
                         }
                     }

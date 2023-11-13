@@ -1,6 +1,7 @@
 package com.example.explorecity
 
 import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -32,6 +33,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -44,14 +46,23 @@ import androidx.navigation.NavController
 import com.example.explorecity.api.classes.event.emptySingleEventResponse
 import com.example.explorecity.api.models.ApiViewModel
 import com.example.explorecity.api.models.EventStorage
+import com.example.explorecity.api.models.UserInformation
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DetailsActivity(navBarController: NavController, viewModel: ApiViewModel) {
+    var toastMessage by remember { mutableStateOf<String?>(null) }
+
     // Scrollable content since we don't know how long the description will be
     val eventID = EventStorage.instance.getEventID()
 
     val event by viewModel.singleEvent.observeAsState(emptySingleEventResponse())
+
+    val userInfo = UserInformation.instance
+
+    val scope = rememberCoroutineScope()
 
     LaunchedEffect(Unit) {
         try {
@@ -106,7 +117,13 @@ fun DetailsActivity(navBarController: NavController, viewModel: ApiViewModel) {
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Button(onClick = { /* Follow logic */ }, modifier = Modifier.weight(20f)) {
+            Button(onClick = {
+                scope.launch {
+                    viewModel.addUserToEvent(eventID = eventID, userID = userInfo.getUserID())
+                    delay(2000)
+                    toastMessage = "You Are Signed Up!"
+                }
+            }, modifier = Modifier.weight(20f)) {
                 Text("Follow")
             }
             Spacer(modifier = Modifier.weight(1f))
@@ -135,6 +152,10 @@ fun DetailsActivity(navBarController: NavController, viewModel: ApiViewModel) {
                     Icon(Icons.Default.Place, contentDescription = "Location")
                     Spacer(modifier = Modifier.width(10.dp))
                     Column {
+                        Text("Host: ${event.host.displayname}")
+                        Text("Attending: ${event.attendees.size}")
+                        Text("Start Time: ${event.start.day} / ${event.start.month} / ${event.start.year}")
+                        Text("End Time: ${event.end.day} / ${event.end.month} / ${event.end.year}")
                         Text("Lat: ${event.location.lat}")
                         Text("Lon: ${event.location.lon}")
                     }
@@ -161,6 +182,11 @@ fun DetailsActivity(navBarController: NavController, viewModel: ApiViewModel) {
                 Text(event.description)
             }
         }
+    }
+    toastMessage?.let { message ->
+        DisplayToast(message = message)
+        // Clear the toast message to avoid displaying it again on recomposition
+        toastMessage = null
     }
 }
 
