@@ -92,17 +92,14 @@ fun HostActivity (navController: NavController) {
                 }
             }
         },
-        content=  {
+        content= {
             Scaffold(topBar = {
                     TopAppBar(
                         title = {
-                            Box (modifier = Modifier.fillMaxWidth()){
-                                Text(
-                                    "My Events",
-                                    fontWeight = FontWeight.ExtraBold,
-                                    color = Color.White
-                                )
-                            }
+                            Text(
+                                "My Events",
+                                color = Color.White
+                            )
                         },
                         navigationIcon = {
                             IconButton(onClick = { navController.navigate("host_prof") }) {
@@ -127,7 +124,9 @@ fun HostActivity (navController: NavController) {
                         },
                         colors = TopAppBarDefaults.largeTopAppBarColors(
                             containerColor = DarkBlue,
-                        ),)
+                        ),
+                        )
+
 
             }, content = { paddingValues ->
                 LazyColumn(modifier = Modifier.padding(paddingValues)) {

@@ -117,6 +117,7 @@ fun ChatActivity(navBarController: NavController) {
                             currentMessage = it
                         }
                     },
+                    singleLine = true,
                     placeholder = { Text("Type a message...") },
                     modifier = Modifier
                         .fillMaxWidth()

@@ -212,7 +212,6 @@ fun EventCreationActivity(navController: NavController  ) {
                         modifier = Modifier
                             .padding(20.dp)
                             .fillMaxWidth(),
-                        textStyle = LocalTextStyle.current.copy(textAlign = TextAlign.Center),
                         singleLine = true,
                     )
 
@@ -328,10 +327,10 @@ fun EventCreationActivity(navController: NavController  ) {
                             modifier = Modifier
                                 .padding(20.dp)
                                 .fillMaxWidth()
-                                .clickable { launchAutocomplete() },
+                                .clickable{launchAutocomplete()},
                             trailingIcon = {
                                 IconButton(
-                                    onClick = { launchAutocomplete },
+                                    onClick = launchAutocomplete,
                                     content = {
                                         Icon(
                                             Icons.Default.Search,
@@ -446,4 +445,3 @@ fun showTimePicker(context: Context, timeState: MutableState<String>) {
 private fun Int.toTwoDigitString(): String {
     return this.toString().padStart(2, '0')
 }
-

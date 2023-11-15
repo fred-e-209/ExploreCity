@@ -119,8 +119,6 @@ fun HomeActivity(navController: NavController) {
 
 /* TEMPORARY OBJECTS
 *  TODO: Replace with a version that works with the database
-*
-
 * */
 
 data class DetailedEvent(
