@@ -46,7 +46,6 @@ data class BottomNavigationItem(
     val unselectedIcon: ImageVector,
 )
 
-
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -96,7 +95,7 @@ fun HomeActivity(navController: NavController, viewModel: ApiViewModel) {
                                 navBarController.navigate(item.route) {
                                     // Prevents re-navigating to the same destination
                                     launchSingleTop = true
-                                    // Restore state when reselecting a previously selected item
+                                    // Restore state when re-selecting a previously selected item
                                     restoreState = true
                                 }
                             },
@@ -119,7 +118,8 @@ fun HomeActivity(navController: NavController, viewModel: ApiViewModel) {
                 composable("explore") { ExploreActivity(navBarController) }
                 composable("profile") { ProfileActivity(navController)}
                 composable("details") { DetailsActivity(navBarController, viewModel)}
-        }
+                composable("chat") { ChatActivity(navBarController)}
+            }
     }
 }
 }

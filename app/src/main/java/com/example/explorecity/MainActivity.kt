@@ -68,6 +68,15 @@ fun AppNavigator(viewModel: ApiViewModel) {
         composable("event_details") {
             DetailsActivity(navController, viewModel)
         }
+        composable("details") {
+            DetailsActivity(navController)
+        }
+        composable("questions") {
+            CommonQuestions(navController)
+        }
+        composable("account") {
+            ProfileDetails(navController)
+        }
     }
 }
 

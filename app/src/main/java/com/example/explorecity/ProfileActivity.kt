@@ -32,8 +32,7 @@ fun ProfileActivity(navController: NavController) {
     ) {
         // List of clickable text items
         val items = mapOf(
-            "User Preferences" to "prefs",
-            "App Settings" to "settings",
+            "My Account" to "account",
             "Common Questions" to "questions",
             "Log Out" to "login"
         )

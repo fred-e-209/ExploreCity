@@ -21,6 +21,8 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.graphics.Color
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.OutlinedTextField
@@ -31,6 +33,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.ImeAction
@@ -59,6 +62,7 @@ fun LoginActivity(navController: NavController, apiVM: ApiViewModel) {
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .verticalScroll(rememberScrollState())
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
@@ -68,7 +72,7 @@ fun LoginActivity(navController: NavController, apiVM: ApiViewModel) {
         Image(
             painter = logoPainter,
             contentDescription = "App Logo",
-            modifier = Modifier.padding(bottom = 4.dp)
+            modifier = Modifier.padding(bottom = 4.dp).width(100.dp).height(100.dp),
         )
 
 
@@ -184,7 +188,7 @@ fun LoginActivity(navController: NavController, apiVM: ApiViewModel) {
                 navController.navigate("home")
             }, modifier = Modifier.weight(10f))
             {
-                Text(text = "Continue as Guest")
+                Text(text = "Continue as Guest (Debug")
             }
             Spacer(modifier = Modifier.weight(1f))  // This takes up one-third of the width
         }

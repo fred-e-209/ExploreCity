@@ -17,6 +17,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Star
@@ -25,11 +26,15 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
@@ -45,9 +50,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
@@ -76,6 +84,7 @@ fun SearchActivity(navController: NavController, viewModel: ApiViewModel) {
     var endDate by remember { mutableStateOf(Date()) }
     val selectedEventTypes = mutableStateListOf<String>()
     var selectedDistance by remember { mutableStateOf("") }
+    val context = LocalContext.current
 
     val userEvents by viewModel.userEvents.observeAsState(emptyList())
 
@@ -97,57 +106,115 @@ fun SearchActivity(navController: NavController, viewModel: ApiViewModel) {
                         ) {
                             Spacer(modifier = Modifier.height(16.dp))
 
-                            Text(text = "Filters", fontSize = 24.sp, fontWeight = FontWeight.Bold)
+                            Text(text = "Event Filters",
+                                fontSize = 24.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = DarkBlue,
+                            )
 
                             Spacer(modifier = Modifier.height(16.dp))
-                            Text(text = "Start Date:")
-                            // Add DatePicker here for `startDate`
+                            Row (verticalAlignment = Alignment.CenterVertically) {
+                                Text(text = "Start Date:")
+                                OutlinedTextField(
+                                    value =startDate.value,
+                                    onValueChange = { /* Do nothing as this is read-only */ },
+                                    readOnly = true,
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(10.dp)
+                                        .width(150.dp)
+                                    ,
+                                    trailingIcon = {
+                                        IconButton(onClick = {showDatePicker(context, startDate)}) {
+                                            Icon(painterResource(R.drawable.ic_calendar), contentDescription = "Select Date")
+                                        }
+                                    },
+                                    colors = TextFieldDefaults.colors(
+                                        focusedContainerColor = Color.White,
+                                        unfocusedContainerColor = Color.White,
+                                        disabledContainerColor = Color.White,
+                                    ),
+                                    textStyle = LocalTextStyle.current.copy(textAlign = TextAlign.Center),
+                                    singleLine = true,
+                                )
+                            }
+
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Row (verticalAlignment = Alignment.CenterVertically){
+                                Text(text = "End Date:  ")
+                                OutlinedTextField(
+                                    value =endDate.value,
+                                    onValueChange = { /* Do nothing as this is read-only */ },
+                                    readOnly = true,
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(10.dp)
+                                        .width(150.dp)
+                                    ,
+                                    trailingIcon = {
+                                        IconButton(onClick = {showDatePicker(context, endDate)}) {
+                                            Icon(painterResource(R.drawable.ic_calendar), contentDescription = "Select Date")
+                                        }
+                                    },
+                                    colors = TextFieldDefaults.colors(
+                                        focusedContainerColor = Color.White,
+                                        unfocusedContainerColor = Color.White,
+                                        disabledContainerColor = Color.White,
+                                    ),
+                                    textStyle = LocalTextStyle.current.copy(textAlign = TextAlign.Center),
+                                    singleLine = true,
+                                )
+                            }
 
                             Spacer(modifier = Modifier.height(16.dp))
-                            Text(text = "End Date:")
-                            // Add DatePicker here for `endDate`
-
-                            Spacer(modifier = Modifier.height(16.dp))
-                            Text(text = "Type")
+                            Text(text = "Type", modifier = Modifier.padding(bottom= 5.dp), color= DarkBlue)
                             Row(
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                modifier = Modifier.fillMaxWidth().padding(bottom = 5.dp)
+                                horizontalArrangement = Arrangement.SpaceEvenly,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(bottom = 5.dp)
                             ) {
                                 EventTypeButton("Music", selectedEventTypes)
                                 EventTypeButton("Sports", selectedEventTypes)
                             }
                             Row(
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                modifier = Modifier.fillMaxWidth().padding(bottom = 5.dp)
+                                horizontalArrangement = Arrangement.SpaceEvenly,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(bottom = 5.dp)
                             ) {
                                 EventTypeButton("Religious", selectedEventTypes)
                                 EventTypeButton("Tourism", selectedEventTypes)
                             }
                             Row(
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                modifier = Modifier.fillMaxWidth().padding(bottom = 5.dp)
+                                horizontalArrangement = Arrangement.SpaceEvenly,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(bottom = 5.dp)
                             ) {
                                 EventTypeButton("Social", selectedEventTypes)
                                 EventTypeButton("Business", selectedEventTypes)
                             }
 
                             Spacer(modifier = Modifier.height(16.dp))
-                            Text(text = "Distance")
+                            Text(text = "Max Distance Away",
+                                modifier = Modifier.padding(bottom = 5.dp), color= DarkBlue
+                            )
                             Row(
-                                horizontalArrangement = Arrangement.SpaceBetween,
+                                horizontalArrangement = Arrangement.SpaceEvenly,
                                 modifier = Modifier.fillMaxWidth()
                             ) {
-                                SelectableButton("<1 m", selectedDistance) {
+                                SelectableButton("1 m", selectedDistance) {
                                     selectedDistance = it
                                 }
-                                SelectableButton("<2.5 m", selectedDistance) {
+                                SelectableButton("2.5 m", selectedDistance) {
                                     selectedDistance = it
                                 }
-                                SelectableButton("<5m", selectedDistance) {
+                                SelectableButton("5 m", selectedDistance) {
                                     selectedDistance = it
                                 }
                             }
-                            SelectableButton("<10m", selectedDistance) {
+                            SelectableButton("10m", selectedDistance) {
                                 selectedDistance = it
                             }
                             // ... Add more distance buttons ...
@@ -166,52 +233,42 @@ fun SearchActivity(navController: NavController, viewModel: ApiViewModel) {
             },
             content = {
                 CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr ) {
-                    Scaffold(
-                        topBar = {
-                            TopAppBar(
-                                title = {
-                                    OutlinedTextField(
-                                        value = searchQuery.value,
-                                        onValueChange = { searchQuery.value = it },
-                                        keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Search),
-                                        keyboardActions = KeyboardActions(onSearch = {
-                                            // Logic for searching the events goes here.
-                                        }),
-                                        shape = RoundedCornerShape(8.dp), // Rounded corners for the outline
-                                        singleLine = true, // Makes sure it's a single line text field
-                                        placeholder = { Text("Search ExploreCity Events...") },
-                                        leadingIcon = {
-                                            Icon(
-                                                imageVector = Icons.Default.Search,
-                                                contentDescription = "Search Icon"
-                                            )
-                                        },
-                                        trailingIcon = {
-                                            Icon(
-                                                imageVector = Icons.Default.Star,
-                                                contentDescription = "Filter Icon",
-                                                modifier = Modifier.clickable {
-                                                    coroutineScope.launch {
-                                                        drawerState.open()
-                                                    }
-                                                }
-                                            )
-                                        },
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .padding(10.dp)
-                                    )
-                                },
-                            )
-                        }
-                    ) { paddingValues ->
-                        // This is where the cards for events will appear after a search.
-                        // Use a LazyColumn for efficiency if expecting many cards.
-
-                        // Example card:
-                        LazyColumn(modifier = Modifier.padding(paddingValues)) {
-                            items(userEvents) { event ->
-                                EventCard(event) {
+                    Column {
+                        OutlinedTextField(
+                            value = searchQuery.value,
+                            onValueChange = { searchQuery.value = it },
+                            keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Search),
+                            keyboardActions = KeyboardActions(onSearch = {
+                                // Logic for searching the events goes here.
+                            }),
+                            shape = RoundedCornerShape(8.dp), // Rounded corners for the outline
+                            singleLine = true, // Makes sure it's a single line text field
+                            placeholder = { Text("Search ExploreCity Events...") },
+                            leadingIcon = {
+                                Icon(
+                                    imageVector = Icons.Default.Search,
+                                    contentDescription = "Search Icon"
+                                )
+                            },
+                            trailingIcon = {
+                                Icon(
+                                    painter = painterResource(id = R.drawable.ic_filter),
+                                    contentDescription = "Filter Icon",
+                                    tint = DarkBlue,
+                                    modifier = Modifier.clickable {
+                                        coroutineScope.launch {
+                                            drawerState.open()
+                                        }
+                                    }
+                                )
+                            },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(10.dp)
+                        )
+                        LazyColumn(modifier = Modifier.padding(5.dp)) {
+                            items(events) { event ->
+                                EventCard(event, onClick = {
                                     // This is a placeholder for navigating to the event details
                                     navController.navigate("details")
                                 }
@@ -233,9 +290,10 @@ fun SelectableButton(label: String, selectedValue: String, onSelected: (String) 
             contentColor = if (selectedValue == label) Color.White else Color.Black
         ),
         border = BorderStroke(1.dp, Color.Gray),
-        shape = RoundedCornerShape(8.dp)
+        shape = RoundedCornerShape(8.dp),
+        modifier = Modifier.width(75.dp)
     ) {
-        Text(text = label)
+        Text(text = label, maxLines = 1)
     }
 }
 
@@ -252,7 +310,8 @@ fun EventTypeButton(eventType: String, selectedEventTypes: MutableList<String>) 
             }
         },
         colors = ButtonDefaults.buttonColors(containerColor = if (isSelected) DarkBlue else Color.Transparent),
-        border = BorderStroke(1.dp, Color.Black)
+        border = BorderStroke(1.dp, Color.Black),
+        modifier = Modifier.width(120.dp)
     ) {
         Text(text = eventType, color = if (isSelected) Color.White else Color.Black, overflow = TextOverflow.Ellipsis)
     }
