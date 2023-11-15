@@ -48,6 +48,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.toSize
 import androidx.navigation.NavController
+import com.example.explorecity.api.classes.event.DateTimeBody
 import com.example.explorecity.api.classes.event.EventBody
 import com.example.explorecity.api.classes.event.Location
 import com.example.explorecity.api.models.ApiViewModel
@@ -79,7 +80,9 @@ fun EventCreationActivity(navController: NavController  ) {
     val eventBody = EventBody(
         displayname = eventName,
         description = eventDetails,
-        location = Location(43.2394, 54.2039)
+        location = "ChIJmb50i5SDRoYR_Q9QjI96P6c",
+        start = DateTimeBody(16, 8, 0, 11, 2023),
+        end = DateTimeBody(16, 10, 0, 11, 2023)
     )
 
     // Scope for calling, and API handler
@@ -103,14 +106,12 @@ fun EventCreationActivity(navController: NavController  ) {
                 // Handle event submission logic here
                 scope.launch {
                     val eventID = apiVM.createEvent(eventBody)
-                    if (eventID > 0) {
-                        toastMessage = "Event Created!"
+                    toastMessage = if (eventID > 0) {
+                        "Event Created!"
                     } else {
-                        toastMessage = "Event not created"
+                        "Event not created"
                     }
                 }
-
-
             }) {
                 Icon(Icons.Default.Check, contentDescription = "Submit Event")
             }
