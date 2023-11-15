@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -23,16 +22,12 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Call
-import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Place
-import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -60,7 +55,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.unit.max
 import androidx.navigation.NavController
 import com.example.explorecity.ui.theme.DarkBlue
 import java.text.ParseException
@@ -80,10 +74,11 @@ fun DetailsActivity(navBarController: NavController) {
         startTime = "2:00",
         endDate = "11-12-2023",
         endTime = "5:00",
+        attendees = 123,
         name = "Some Event",
         host = "Some guy",
         location =  "Some Address,College Station,TX",
-        eventType =  "Event Type",
+        eventType =  "Social",
         description =  "This is where the description of the event will be located. It will include" +
                 " all additional information the host wants to add. We should probably add a character limit " +
                 "or something. ",
@@ -95,8 +90,8 @@ fun DetailsActivity(navBarController: NavController) {
     val isFollowing = event.attending // This should be a state that triggers recompositions when changed
 
     // Use animateFloatAsState to animate the weight changes
-    val followButtonWeight by animateFloatAsState(if (isFollowing) 1f else 3f)
-    val chatButtonWeight by animateFloatAsState(if (isFollowing) 3f else 1f)
+    val followButtonWeight by animateFloatAsState(if (isFollowing) 1f else 3f, label = "")
+    val chatButtonWeight by animateFloatAsState(if (isFollowing) 3f else 1f, label = "")
 
 
     val toggleFollow = {
@@ -132,7 +127,7 @@ fun DetailsActivity(navBarController: NavController) {
                         Icons.Default.ArrowBack,
                         contentDescription = "Back",
                         modifier = Modifier.clickable(
-                            onClick = { navBarController.navigate("events") })
+                            onClick = { navBarController.popBackStack() })
                     )
                 }, actions = {ReportEventOption()}
             )
@@ -168,11 +163,11 @@ fun DetailsActivity(navBarController: NavController) {
                         )
                     )
                     Spacer(modifier = Modifier.height(4.dp))
-                    Text(text = "Hosted by ${event.host}", style = TextStyle(color = Color.Gray))
+                    Text(text = "Hosted by ${event.host} ⚬ ${event.attendees} attending", style = TextStyle(color = Color.Gray))
                 }
             }
 
-            Spacer(modifier = Modifier.height(5.dp))
+            Spacer(modifier = Modifier.height(6.dp))
 
             Row(
                 verticalAlignment = Alignment.CenterVertically,
@@ -190,7 +185,7 @@ fun DetailsActivity(navBarController: NavController) {
                                 stiffness = Spring.StiffnessLow
                             )
                         ),
-                    colors = if (isFollowing) ButtonDefaults.buttonColors(containerColor = Color.Red) else ButtonDefaults.buttonColors(containerColor = DarkBlue)
+                    colors = if (isFollowing) ButtonDefaults.buttonColors(containerColor = Color(0xFFaf0104)) else ButtonDefaults.buttonColors(containerColor = DarkBlue)
                 ) {
                     if (isFollowing) {
                         Icon(Icons.Default.ExitToApp, contentDescription = "Unfollow")
@@ -203,7 +198,7 @@ fun DetailsActivity(navBarController: NavController) {
 
                 // Chat Button
                 Button(
-                    onClick = { /* Navigate to chat room if isFollowing, otherwise do nothing */ },
+                    onClick = { navBarController.navigate("chat") },
                     modifier = Modifier
                         .weight(chatButtonWeight)
                         .animateContentSize(
@@ -260,7 +255,6 @@ fun DetailsActivity(navBarController: NavController) {
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.Start
                     ) {
-                        // Replace with appropriate icon for event type
                         Icon(
                             painterResource(R.drawable.ic_calendar),
                             tint = DarkBlue,
@@ -284,9 +278,19 @@ fun DetailsActivity(navBarController: NavController) {
                     ) {
                         // Replace with appropriate icon for event type
                         Icon(
-                            Icons.Default.CheckCircle,
+                            when (event.eventType){
+                               "Social" -> painterResource(R.drawable.ic_social)
+                                "Business" -> painterResource(R.drawable.ic_business)
+                                "Sports" -> painterResource(R.drawable.ic_sports)
+                                "Tourism" -> painterResource(R.drawable.ic_tourism)
+                                "Concert" -> painterResource(R.drawable.ic_concert)
+                                else -> {
+                                    painterResource(R.drawable.logo)
+                                }
+                            },
                             contentDescription = "Event Type",
                             tint = DarkBlue,
+                            modifier = Modifier.width(25.dp).height(25.dp)
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(event.eventType)

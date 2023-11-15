@@ -43,7 +43,7 @@ fun CommonQuestions(navController: NavController) {
         Button(
             onClick = {
                 // Handle button click if needed
-                navController.navigate("home")
+                navController.popBackStack()
             },
             modifier = Modifier.fillMaxWidth(),
         ) {

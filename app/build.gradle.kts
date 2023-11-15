@@ -67,5 +67,6 @@ dependencies {
     debugImplementation("androidx.compose.ui:ui-test-manifest")
     implementation ("androidx.navigation:navigation-compose:2.7.5")
     implementation("com.google.android.gms:play-services-maps:18.1.0")
+    implementation ("com.google.android.libraries.places:places:3.2.0")
     implementation("com.google.maps.android:maps-compose:4.1.1")
 }

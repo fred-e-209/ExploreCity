@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -35,6 +36,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.example.explorecity.ui.theme.DarkBlue
 import androidx.navigation.NavController
 import com.google.android.gms.maps.model.CameraPosition
@@ -127,7 +129,7 @@ fun GoogleMapsView(navController: NavController, viewMode: MutableState<String>)
         MarkerInfoWindow(
             state = MarkerState(position = LatLng(30.610657, -96.340695)),
             onInfoWindowClick = {
-                viewMode.value = "details"
+                navController.navigate("details")
             }
 
         )
@@ -161,14 +163,26 @@ fun GoogleMapsView(navController: NavController, viewMode: MutableState<String>)
 @SuppressLint("UnrememberedMutableState")
 @Composable
 fun EventsListView(navController: NavController) {
+
+
     val events = mutableStateListOf(
         Event("Month, Year- Time", "Event 1", "Address, City, State"),
         Event("Month, Year- Time", "Event 2", "Address, City, State")
         // ... add more events
     )
-
-    Box(modifier = Modifier.fillMaxSize()) {
-        LazyColumn (modifier = Modifier.padding(5.dp)){
+    Column(modifier = Modifier.fillMaxSize()) {
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(top =10.dp),
+            horizontalArrangement = Arrangement.Center
+        ) {
+            Text(
+                text = "Nearby Events",
+                fontWeight = FontWeight.Bold,
+                color = DarkBlue,
+                fontSize = 20.sp,
+            )
+        }
+        LazyColumn (modifier = Modifier.padding(vertical=5.dp)){
             items(events) { event ->
                 EventCard(event, onClick = {
                     // This is a placeholder for navigating to the event details
@@ -178,7 +192,5 @@ fun EventsListView(navController: NavController) {
         }
     }
 }
-
-
 
 

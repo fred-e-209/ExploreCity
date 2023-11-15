@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -58,11 +57,18 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.toSize
 import androidx.navigation.NavController
 import com.example.explorecity.ui.theme.DarkBlue
-import java.text.ParseException
-import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
-
+import android.app.Activity
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.layout.Row
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.Button
+import com.google.android.libraries.places.api.Places
+import com.google.android.libraries.places.api.model.Place
+import com.google.android.libraries.places.widget.Autocomplete
+import com.google.android.libraries.places.widget.model.AutocompleteActivityMode
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -77,9 +83,31 @@ fun EventCreationActivity(navController: NavController  ) {
     val endDate = remember { mutableStateOf("") }
     val startTime = remember { mutableStateOf("") }
     val endTime = remember { mutableStateOf("") }
+    var placeID by remember { mutableStateOf("") }
+    var location by remember {mutableStateOf("")}
     val context = LocalContext.current
 
-    val eventTypes = listOf("Concert", "Sports", "Social", "Others")
+    val eventTypes = listOf("Social", "Business", "Concert", "Sports", "Art", "Academic", "Tourism", "Special Event")
+
+    val autocompleteLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            val place = Autocomplete.getPlaceFromIntent(result.data!!)
+            placeID = (place.id ?: "")
+            location = (place.name ?:"")
+        }
+    }
+
+    val launchAutocomplete = {
+        if (!Places.isInitialized()) {
+            Places.initialize(context, "AIzaSyDPFDQebw-Qwis6bU68K_-pmylM4pJc88k")
+        }
+        val intent = Autocomplete.IntentBuilder(AutocompleteActivityMode.FULLSCREEN,
+            listOf(Place.Field.NAME, Place.Field.ID))
+            .build(context)
+        autocompleteLauncher.launch(intent)
+    }
 
     // Up Icon when expanded and down icon when collapsed
     val icon = if (mExpanded)
@@ -116,6 +144,7 @@ fun EventCreationActivity(navController: NavController  ) {
                     startTime = startTime.toString(),
                     endTime = endTime.toString(),
                     startDate = startDate.toString(),
+                    attendees = 0,
                     endDate = endDate.toString(),
                     name = eventName.toString(),
                     location = eventLocation.toString(),
@@ -129,9 +158,13 @@ fun EventCreationActivity(navController: NavController  ) {
             },
                 containerColor = Color(0xFF00a53c),
                 contentColor = Color.White,
-                modifier = Modifier.width(75.dp).height(75.dp),
+                modifier = Modifier
+                    .width(75.dp)
+                    .height(75.dp),
             ) {
-                Icon(Icons.Default.Check, contentDescription = "Submit Event", modifier = Modifier.width(40.dp).height(40.dp)
+                Icon(Icons.Default.Check, contentDescription = "Submit Event", modifier = Modifier
+                    .width(40.dp)
+                    .height(40.dp)
                 )
             }
         }
@@ -279,21 +312,39 @@ fun EventCreationActivity(navController: NavController  ) {
                         singleLine = true,
                     )
 
-                    Text("Event Location",  Modifier.padding(top = 8.dp), textAlign = TextAlign.Start)
-                    TextField(
-                        value = eventLocation.value,
-                        onValueChange = { eventLocation.value = it },
-                        colors = TextFieldDefaults.colors(
-                            focusedContainerColor = Color.White,
-                            unfocusedContainerColor = Color.White,
-                            disabledContainerColor = Color.White,
-                        ),
-                        placeholder = { Text("Search for Address...") },
-                        // TODO: Implement Places Autocomplete
-                        modifier = Modifier
-                            .padding(20.dp)
-                            .fillMaxWidth(),
-                    )
+                    Text("Event Location", Modifier.padding(top = 8.dp), textAlign = TextAlign.Start)
+                    Row {
+                        TextField(
+                            value = location,
+                            readOnly = true,
+                            onValueChange = { location = it },
+                            colors = TextFieldDefaults.colors(
+                                focusedContainerColor = Color.White,
+                                unfocusedContainerColor = Color.White,
+                                disabledContainerColor = Color.White,
+                            ),
+                            placeholder = { Text("Search for Address...") },
+                            // TODO: Implement Places Autocomplete
+                            modifier = Modifier
+                                .padding(20.dp)
+                                .fillMaxWidth()
+                                .clickable { launchAutocomplete() },
+                            trailingIcon = {
+                                IconButton(
+                                    onClick = { launchAutocomplete },
+                                    content = {
+                                        Icon(
+                                            Icons.Default.Search,
+                                            contentDescription = "Search"
+                                        )
+                                    },
+                                )
+                            },
+                        )
+                        Button(onClick = { launchAutocomplete() }) {
+                            Text("Search")
+                        }
+                    }
 
                     Text("Event Type",  Modifier.padding(top = 8.dp))
                     Column(Modifier.padding(20.dp)) {
@@ -395,3 +446,4 @@ fun showTimePicker(context: Context, timeState: MutableState<String>) {
 private fun Int.toTwoDigitString(): String {
     return this.toString().padStart(2, '0')
 }
+
