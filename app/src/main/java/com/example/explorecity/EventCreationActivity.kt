@@ -59,7 +59,6 @@ import androidx.compose.ui.unit.toSize
 import androidx.navigation.NavController
 import com.example.explorecity.api.classes.event.DateTimeBody
 import com.example.explorecity.api.classes.event.EventBody
-import com.example.explorecity.api.classes.event.Location
 import com.example.explorecity.api.models.ApiViewModel
 import kotlinx.coroutines.launch
 
@@ -76,22 +75,23 @@ import com.google.android.libraries.places.api.Places
 import com.google.android.libraries.places.api.model.Place
 import com.google.android.libraries.places.widget.Autocomplete
 import com.google.android.libraries.places.widget.model.AutocompleteActivityMode
+import kotlinx.coroutines.delay
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EventCreationActivity(navController: NavController  ) {
     var toastMessage by remember { mutableStateOf<String?>(null) }
 
-    val eventName = remember { mutableStateOf("") }
-    val eventLocation = remember { mutableStateOf("") }
-    val eventDetails = remember { mutableStateOf("") }
+    var eventName by remember { mutableStateOf("") }
+    var eventLocation by remember { mutableStateOf("") }
+    var eventDetails by remember { mutableStateOf("") }
     var eventType by remember { mutableStateOf("") }
     var mExpanded by remember { mutableStateOf(false) }
     var mTextFieldSize by remember { mutableStateOf(Size.Zero)}
-    val startDate = remember { mutableStateOf("") }
-    val endDate = remember { mutableStateOf("") }
-    val startTime = remember { mutableStateOf("") }
-    val endTime = remember { mutableStateOf("") }
+    var startDate by remember { mutableStateOf("") }
+    var endDate by remember { mutableStateOf("") }
+    var startTime by remember { mutableStateOf("") }
+    var endTime by remember { mutableStateOf("") }
     var placeID by remember { mutableStateOf("") }
     var location by remember {mutableStateOf("")}
     val context = LocalContext.current
@@ -131,7 +131,7 @@ fun EventCreationActivity(navController: NavController  ) {
     val eventBody = EventBody(
         displayname = eventName,
         description = eventDetails,
-        location = "ChIJmb50i5SDRoYR_Q9QjI96P6c",
+        location = placeID,
         start = DateTimeBody(16, 8, 0, 11, 2023),
         end = DateTimeBody(16, 10, 0, 11, 2023)
     )
@@ -165,11 +165,12 @@ fun EventCreationActivity(navController: NavController  ) {
                     // Handle event submission logic here
                     scope.launch {
                         val eventID = apiVM.createEvent(eventBody)
-                        toastMessage = if (eventID > 0) {
-                            "Event Created!"
+                        if (eventID > 0) {
+                            toastMessage = "Event Created!"
+                            delay(500)
                             navController.navigate("host_home")
                         } else {
-                            "Event not created"
+                            toastMessage = "Event not created"
                         }
                     }
                 },
@@ -216,9 +217,9 @@ fun EventCreationActivity(navController: NavController  ) {
                 )
                 Text("Event Name", Modifier.padding(top = 20.dp))
                 TextField(
-                    value = eventName.value,
+                    value = eventName,
                     onValueChange = {
-                        if (it.length <= 40){ eventName.value = it}
+                        if (it.length <= 40){ eventName = it}
                     },
                     placeholder = { Text("Limit 40 characters...")},
                     colors = TextFieldDefaults.colors(
@@ -236,7 +237,7 @@ fun EventCreationActivity(navController: NavController  ) {
                 // Event Date
                 Text("Start Date",  Modifier.padding(top = 8.dp))
                 TextField(
-                    value = startDate.value,
+                    value = startDate,
                     onValueChange = { /* Do nothing as this is read-only */ },
                     readOnly = true,
                     placeholder = { Text("Select Date") },

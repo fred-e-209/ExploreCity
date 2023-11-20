@@ -4,6 +4,7 @@ import com.example.explorecity.api.classes.auth.LoginValidResponse
 import com.example.explorecity.api.classes.auth.RegistrationBody
 import com.example.explorecity.api.classes.auth.RegistrationResponse
 import com.example.explorecity.api.classes.event.EventBody
+import com.example.explorecity.api.classes.event.EventDetailBody
 import com.example.explorecity.api.classes.event.EventListResponse
 import com.example.explorecity.api.classes.event.SingleEventResponse
 import retrofit2.Call
@@ -13,6 +14,7 @@ import retrofit2.http.PATCH
 import retrofit2.http.POST
 import retrofit2.http.PUT
 import retrofit2.http.Path
+import retrofit2.http.Query
 
 
 interface ApiInterfaces {
@@ -33,4 +35,10 @@ interface ApiInterfaces {
 
     @PUT("/event/{eventID}/user/{userID}")
     suspend fun addUserToEvent(@Path("eventID") eventID: Int, @Path("userID") userID: Int)
+
+    @POST("/location/event/{eventID}")
+    suspend fun updateUserLocation(@Path("eventID") eventID: Int)
+
+    @GET("/event/search")
+    suspend fun searchEvent(@Query("query") query: String): List<EventDetailBody>
 }

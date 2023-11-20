@@ -52,6 +52,9 @@ import com.google.maps.android.compose.rememberMarkerState
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ExploreActivity(navController: NavController) {
+    // Nav Controller
+
+
     // Mutable state to keep track of the current view
     val viewMode = remember { mutableStateOf("map") } // "map" or "list"
 

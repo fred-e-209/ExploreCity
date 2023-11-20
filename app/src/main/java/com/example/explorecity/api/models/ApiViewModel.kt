@@ -5,11 +5,8 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.explorecity.api.callers.RetrofitInstance
-import com.example.explorecity.api.classes.auth.LoginValidResponse
 import com.example.explorecity.api.classes.auth.RegistrationBody
-import com.example.explorecity.api.repository.Repository
 import kotlinx.coroutines.launch
 import retrofit2.Call
 import retrofit2.Callback
@@ -18,7 +15,6 @@ import com.example.explorecity.api.classes.auth.RegistrationErrorResponse
 import com.example.explorecity.api.classes.auth.RegistrationResponse
 import com.example.explorecity.api.classes.event.EventBody
 import com.example.explorecity.api.classes.event.EventDetailBody
-import com.example.explorecity.api.classes.event.Hosting
 import com.example.explorecity.api.classes.event.SingleEventResponse
 import kotlinx.coroutines.delay
 import org.json.JSONArray

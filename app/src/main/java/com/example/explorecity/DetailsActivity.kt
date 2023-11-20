@@ -1,5 +1,6 @@
 package com.example.explorecity
 
+import android.util.Log
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
@@ -43,9 +44,12 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -56,7 +60,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.text.TextStyle
 import androidx.navigation.NavController
+import com.example.explorecity.api.classes.event.DateTimeBody
+import com.example.explorecity.api.classes.event.emptySingleEventResponse
+import com.example.explorecity.api.models.ApiViewModel
+import com.example.explorecity.api.models.EventStorage
+import com.example.explorecity.api.models.UserInformation
 import com.example.explorecity.ui.theme.DarkBlue
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import java.text.ParseException
 import java.text.SimpleDateFormat
 import java.util.Locale
@@ -64,6 +75,9 @@ import java.util.Locale
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DetailsActivity(navBarController: NavController, viewModel: ApiViewModel) {
+    // Dialogs
+    var dialogMessage by remember { mutableStateOf("") }
+    var showConfirmDialog by remember { mutableStateOf(false) }
 
     // Scrollable content since we don't know how long the description will be
     val eventID = EventStorage.instance.getEventID()
@@ -90,11 +104,14 @@ fun DetailsActivity(navBarController: NavController, viewModel: ApiViewModel) {
 
 
     val toggleFollow = {
-        event = event.copy(attending = !event.attending)
+        scope.launch {
+            viewModel.addUserToEvent(eventID = eventID, userID = userInfo.getUserID())
+            delay(2000)
+        }
         dialogMessage = if (event.attending) {
-            "You are now following ${event.name}"
+            "You are now following ${event.displayname}"
         } else {
-            "You are no longer following ${event.name}"
+            "You are no longer following ${event.displayname}"
         }
         showConfirmDialog = true
     }
@@ -151,7 +168,7 @@ fun DetailsActivity(navBarController: NavController, viewModel: ApiViewModel) {
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
                     Text(
-                        text = event.name, style = TextStyle(
+                        text = event.displayname, style = TextStyle(
                             fontWeight = FontWeight.ExtraBold,
                             fontSize = 36.sp,
                             color= DarkBlue,
@@ -232,14 +249,14 @@ fun DetailsActivity(navBarController: NavController, viewModel: ApiViewModel) {
                     ) {
                         Icon(Icons.Default.Place, contentDescription = "Location", tint = DarkBlue)
                         Spacer(modifier = Modifier.width(10.dp))
-                        val parsedLocation = event.location.split(',')
+                        val parsedLocation = event.address.split(',')
 
                         Column {
                             if (parsedLocation.size == 3) {
                                 Text(parsedLocation[0])
                                 Text("${parsedLocation[1]}, ${parsedLocation[2]}")
                             } else {
-                                Text(event.location)
+                                Text(event.address)
                             }
                         }
                     }
@@ -257,10 +274,10 @@ fun DetailsActivity(navBarController: NavController, viewModel: ApiViewModel) {
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Column {
-                            val startDate = formatDate(event.startDate)
-                            val endDate = formatDate(event.endDate)
+                            val startDate = formatDate(event.start)
+                            val endDate = formatDate(event.end)
                             Text(text = if (startDate != endDate) "$startDate to $endDate" else startDate)
-                            Text("${formatTime(event.startTime)} - ${formatTime(event.endTime)}")
+                            Text(text = "${formatTime(event.start)} - ${formatTime(event.end)}")
                         }
                     }
 
@@ -273,7 +290,7 @@ fun DetailsActivity(navBarController: NavController, viewModel: ApiViewModel) {
                     ) {
                         // Replace with appropriate icon for event type
                         Icon(
-                            when (event.eventType){
+                            when (event.venue){
                                 "Social" -> painterResource(R.drawable.ic_social)
                                 "Business" -> painterResource(R.drawable.ic_business)
                                 "Sports" -> painterResource(R.drawable.ic_sports)
@@ -288,7 +305,7 @@ fun DetailsActivity(navBarController: NavController, viewModel: ApiViewModel) {
                             modifier = Modifier.width(25.dp).height(25.dp)
                         )
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text(event.eventType)
+                        Text(event.venue)
                     }
 
                     Spacer(modifier = Modifier.height(24.dp))
@@ -420,12 +437,12 @@ fun ReportEventOption() {
     }
 }
 
-fun formatDate(inputDate: String): String {
+fun formatDate(inputDate: DateTimeBody): String {
     val inputFormat = SimpleDateFormat("MM-dd-yyyy", Locale.getDefault())
     val outputFormat = SimpleDateFormat("MMM d, yyyy", Locale.getDefault())
 
     // Parse the input date
-    val parsedDate = inputFormat.parse(inputDate)
+    val parsedDate = inputFormat.parse("${inputDate.month}-${inputDate.day}-${inputDate.year}")
 
     // Format the date into the new format
     return if (parsedDate != null) {
@@ -435,12 +452,12 @@ fun formatDate(inputDate: String): String {
     }
 }
 
-fun formatTime(inputTime: String): String {
+fun formatTime(inputTime: DateTimeBody): String {
     val inputFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
     val outputFormat = SimpleDateFormat("h:mm a", Locale.getDefault())
 
     return try {
-        val parsedDate = inputFormat.parse(inputTime)
+        val parsedDate = inputFormat.parse("${inputTime.hour}:${inputTime.minute}")
         outputFormat.format(parsedDate)
     } catch (e: ParseException) {
         "Invalid time" // Handle invalid time format
