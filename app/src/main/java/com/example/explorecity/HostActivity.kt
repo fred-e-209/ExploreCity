@@ -35,6 +35,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -46,6 +47,8 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HostActivity (navController: NavController) {
+    val context = LocalContext.current
+    saveLastPage(context, "host_home")
     val events = mutableStateListOf(
         Event("Month, Year- Time", "Event 1", "Address, City, State"),
         Event("Month, Year- Time", "Event 2", "Address, City, State")
@@ -69,8 +72,7 @@ fun HostActivity (navController: NavController) {
                 ) {
                     // List of clickable text items
                     val items = mapOf(
-                        "User Preferences" to "prefs",
-                        "App Settings" to "settings",
+                        "My Account" to "account",
                         "Common Questions" to "questions",
                         "Log Out" to "login"
                     )
@@ -97,7 +99,7 @@ fun HostActivity (navController: NavController) {
                     TopAppBar(
                         title = {
                             Text(
-                                "My Events",
+                                text = "My Events",
                                 color = Color.White
                             )
                         },
@@ -122,8 +124,9 @@ fun HostActivity (navController: NavController) {
                                 )
                             }
                         },
-                        colors = TopAppBarDefaults.largeTopAppBarColors(
+                        colors = TopAppBarDefaults.topAppBarColors(
                             containerColor = DarkBlue,
+                            titleContentColor = Color.White,
                         ),
                         )
 

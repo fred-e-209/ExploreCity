@@ -24,6 +24,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -43,6 +44,10 @@ import com.example.explorecity.ui.theme.DarkBlue
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LoginActivity(navController: NavController) {
+    val context = LocalContext.current
+
+    saveLastPage(context, "login")
+
     var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var toastMessage by remember { mutableStateOf<String?>(null) }
@@ -57,10 +62,11 @@ fun LoginActivity(navController: NavController) {
     ) {
         // Logo placeholder
 
-        Image(
+        Icon(
             painter = logoPainter,
             contentDescription = "App Logo",
             modifier = Modifier.padding(bottom = 4.dp).width(100.dp).height(100.dp),
+            tint = DarkBlue,
         )
 
 
@@ -160,7 +166,7 @@ fun LoginActivity(navController: NavController) {
                 navController.navigate("home")
             }, modifier = Modifier.weight(10f))
             {
-                Text(text = "Continue as Guest (Debug")
+                Text(text = "Continue as Guest (Debug)")
             }
             Spacer(modifier = Modifier.weight(1f))  // This takes up one-third of the width
         }

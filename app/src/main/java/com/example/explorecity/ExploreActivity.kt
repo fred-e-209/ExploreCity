@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -47,6 +46,7 @@ import com.google.maps.android.compose.MarkerInfoWindow
 import com.google.maps.android.compose.MarkerState
 import com.google.maps.android.compose.rememberCameraPositionState
 import com.google.maps.android.compose.rememberMarkerState
+
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -88,7 +88,7 @@ fun ExploreActivity(navController: NavController) {
                     },
                     navigationIcon = {Spacer(modifier = Modifier.width(30.dp))},
                     actions = {
-                        IconButton(onClick = { /* open drawer for filtering */ }) {
+                        IconButton(onClick = {viewMode.value = "filter"}) {
                             Icon(painterResource(R.drawable.ic_filter), contentDescription = "Filter", tint = darkBlue)
                         }
                     }
@@ -110,6 +110,8 @@ fun ExploreActivity(navController: NavController) {
     }
 }
 
+
+
 @Composable
 fun GoogleMapsView(navController: NavController, viewMode: MutableState<String>) {
     val collegeStation = LatLng(30.627977, -96.334406)
@@ -129,9 +131,8 @@ fun GoogleMapsView(navController: NavController, viewMode: MutableState<String>)
         MarkerInfoWindow(
             state = MarkerState(position = LatLng(30.610657, -96.340695)),
             onInfoWindowClick = {
-                navController.navigate("details")
+                viewMode.value = "details"
             }
-
         )
         { marker ->
             Box(
@@ -172,7 +173,9 @@ fun EventsListView(navController: NavController) {
     )
     Column(modifier = Modifier.fillMaxSize()) {
         Row(
-            modifier = Modifier.fillMaxWidth().padding(top =10.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 10.dp),
             horizontalArrangement = Arrangement.Center
         ) {
             Text(

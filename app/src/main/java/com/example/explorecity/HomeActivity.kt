@@ -27,6 +27,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -42,6 +43,9 @@ data class BottomNavigationItem(
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun HomeActivity(navController: NavController) {
+    val context = LocalContext.current
+    saveLastPage(context, "host")
+
     val items = listOf(
         BottomNavigationItem(
             title = "My Events",
