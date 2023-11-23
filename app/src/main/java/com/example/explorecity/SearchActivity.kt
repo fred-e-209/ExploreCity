@@ -23,7 +23,6 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DrawerValue
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalTextStyle
@@ -35,9 +34,7 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -53,54 +50,48 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import com.example.explorecity.api.classes.auth.User
 import com.example.explorecity.api.classes.event.EventDetailBody
 import com.example.explorecity.api.classes.event.EventFilter
-import com.example.explorecity.api.classes.event.FilterEndDate
-import com.example.explorecity.api.classes.event.FilterStartDate
 import com.example.explorecity.api.classes.event.Location
+import com.example.explorecity.api.classes.event.stringToDateTimeBody
 import com.example.explorecity.api.models.ApiViewModel
 import com.example.explorecity.api.models.EventStorage
 import com.example.explorecity.api.models.UserInformation
 import com.example.explorecity.ui.theme.DarkBlue
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import java.util.Date
 
 @SuppressLint("UnrememberedMutableState")
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SearchActivity(navController: NavController, viewModel: ApiViewModel) {
+fun SearchActivity(navController: NavController) {
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val searchQuery = remember { mutableStateOf("") }
 
     val coroutineScope = rememberCoroutineScope()
-    var startDate = remember { mutableStateOf("") }
-    var endDate = remember { mutableStateOf("") }
+    val startDate = remember { mutableStateOf("01-01-1997") }
+    val endDate = remember { mutableStateOf("31-12-2099") }
     val selectedEventTypes = mutableStateListOf<String>()
-    var selectedDistance by remember { mutableStateOf("") }
+    var selectedDistance by remember { mutableStateOf("50") }
     val context = LocalContext.current
 
     // API callers
-    val apiVM = ApiViewModel()
     val userLocation = UserInformation.instance.getUserLocation()
     val eventStorageInstance = EventStorage.instance
 
     // filter class
+
+    var searchEvents by remember { mutableStateOf(emptyList<EventDetailBody>()) }
     val eventFilter = EventFilter(
-        query="",
-        startDate= FilterStartDate(0, 0, 0),
-        endDate = FilterEndDate(0, 0, 0),
-        userLocation = Location(0.0, 0.0),
-        radius = 0
+        query=searchQuery.value,
+        startDate= stringToDateTimeBody(inputDate = startDate.value, inputTime = "00:00"),
+        endDate = stringToDateTimeBody(inputDate = endDate.value, inputTime = "00:00"),
+        userLocation = Location(lat = userLocation.lat, lon = userLocation.lon),
+        radius = selectedDistance.toInt()
     )
-
-    val events: List<EventDetailBody> by remember { mutableStateOf(emptyList()) }
-
 
 
     CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl ) {
@@ -208,24 +199,24 @@ fun SearchActivity(navController: NavController, viewModel: ApiViewModel) {
                             }
 
                             Spacer(modifier = Modifier.height(16.dp))
-                            Text(text = "Max Distance Away",
+                            Text(text = "Max Distance Away in Miles",
                                 modifier = Modifier.padding(bottom = 5.dp), color= DarkBlue
                             )
                             Row(
                                 horizontalArrangement = Arrangement.SpaceEvenly,
                                 modifier = Modifier.fillMaxWidth()
                             ) {
-                                SelectableButton("1 m", selectedDistance) {
+                                SelectableButton("1", selectedDistance) {
                                     selectedDistance = it
                                 }
-                                SelectableButton("2.5 m", selectedDistance) {
+                                SelectableButton("5", selectedDistance) {
                                     selectedDistance = it
                                 }
-                                SelectableButton("5 m", selectedDistance) {
+                                SelectableButton("10", selectedDistance) {
                                     selectedDistance = it
                                 }
                             }
-                            SelectableButton("10m", selectedDistance) {
+                            SelectableButton("50", selectedDistance) {
                                 selectedDistance = it
                             }
                             // ... Add more distance buttons ...
@@ -233,11 +224,9 @@ fun SearchActivity(navController: NavController, viewModel: ApiViewModel) {
                             Spacer(modifier = Modifier.height(16.dp))
                             Button(onClick = { // TODO: Applies filter button
                                 coroutineScope.launch {
-                                    Log.d("SEARCH", "query: ${searchQuery.value}")
-                                    Log.d("SEARCH", "sdate: ${startDate.value}")
-                                    Log.d("SEARCH", "edate: ${endDate.value}")
-                                    Log.d("SEARCH", "dista: $selectedDistance")
-                                    Log.d("SEARCH", "usrlc: ${userLocation.lat} | ${userLocation.lon}")
+                                    Log.d("SEARCH", eventFilter.toString())
+                                    searchEvents = ApiViewModel().fetchEventsByFilter(eventFilter = eventFilter)
+                                    delay(1000)
                                     drawerState.close()
                                 }
                             }) {
@@ -256,6 +245,11 @@ fun SearchActivity(navController: NavController, viewModel: ApiViewModel) {
                             keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Search),
                             keyboardActions = KeyboardActions(onSearch = {
                                 // Logic for searching the events goes here.
+                                coroutineScope.launch {
+                                    Log.d("SEARCH", eventFilter.toString())
+                                    delay(1000)
+                                    searchEvents = ApiViewModel().fetchEventsByFilter(eventFilter = eventFilter)
+                                }
                             }),
                             shape = RoundedCornerShape(8.dp), // Rounded corners for the outline
                             singleLine = true, // Makes sure it's a single line text field
@@ -282,8 +276,8 @@ fun SearchActivity(navController: NavController, viewModel: ApiViewModel) {
                                 .fillMaxWidth()
                                 .padding(10.dp)
                         )
-                        LazyColumn(modifier = Modifier.padding(5.dp)) {
-                            items(events) { event ->
+                        LazyColumn(modifier = Modifier.padding(5.dp).padding(bottom = 100.dp)) {
+                            items(searchEvents) { event ->
                                 EventCard(event) {
                                     eventStorageInstance.setEventID(event.id)
                                     navController.navigate("details")

@@ -7,23 +7,26 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.explorecity.api.callers.RetrofitInstance
 import com.example.explorecity.api.classes.auth.RegistrationBody
-import kotlinx.coroutines.launch
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
 import com.example.explorecity.api.classes.auth.RegistrationErrorResponse
 import com.example.explorecity.api.classes.auth.RegistrationResponse
 import com.example.explorecity.api.classes.event.EventBody
 import com.example.explorecity.api.classes.event.EventDetailBody
-import com.example.explorecity.api.classes.event.Location
+import com.example.explorecity.api.classes.event.EventFilter
 import com.example.explorecity.api.classes.event.SingleEventResponse
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import org.json.JSONArray
 import org.json.JSONException
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 
 class ApiViewModel: ViewModel() {
     private val _events = MutableLiveData<List<EventDetailBody>>()
     val userEvents: LiveData<List<EventDetailBody>> = _events
+
+    private val _searchEvents = MutableLiveData<List<EventDetailBody>>()
+    val searchEvents: LiveData<List<EventDetailBody>> = _searchEvents
 
     private val _singleEvent = MutableLiveData<SingleEventResponse>()
     val singleEvent: LiveData<SingleEventResponse> = _singleEvent
@@ -143,7 +146,7 @@ class ApiViewModel: ViewModel() {
         }
     }
 
-    suspend fun addUserToEvent(eventID: Int, userID: Int): Unit {
+    suspend fun addUserToEvent(eventID: Int, userID: Int) {
         return try {
             RetrofitInstance.authenticateUser().addUserToEvent(eventID = eventID, userID = userID)
         } catch (e: Exception) {
@@ -151,7 +154,22 @@ class ApiViewModel: ViewModel() {
         }
     }
 
-    suspend fun updateUserLocation(location: Location): Unit {
-
+    suspend fun fetchEventsByFilter(eventFilter: EventFilter): List<EventDetailBody> {
+        try {
+            return RetrofitInstance.authenticateUser().searchFilterQuery(
+                query = if (eventFilter.query == "") null else eventFilter.query,
+                startDay = eventFilter.startDate.day,
+                startMonth = eventFilter.startDate.month,
+                startYear = eventFilter.startDate.year,
+                endDay = eventFilter.endDate.day,
+                endMonth = eventFilter.endDate.month,
+                endYear = eventFilter.endDate.year,
+                latitude = eventFilter.userLocation.lat,
+                longitude = eventFilter.userLocation.lon,
+                radius = eventFilter.radius
+            )
+        } catch (e: Exception) {
+            throw e
+        }
     }
 }
