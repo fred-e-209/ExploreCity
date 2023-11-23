@@ -66,16 +66,19 @@ import com.example.explorecity.ui.theme.DarkBlue
 import java.util.Calendar
 import java.util.Locale
 import android.app.Activity
+import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Row
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Button
+import com.example.explorecity.api.classes.event.stringToDateTimeBody
 import com.google.android.libraries.places.api.Places
 import com.google.android.libraries.places.api.model.Place
 import com.google.android.libraries.places.widget.Autocomplete
 import com.google.android.libraries.places.widget.model.AutocompleteActivityMode
 import kotlinx.coroutines.delay
+import java.util.Date
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -89,6 +92,7 @@ fun EventCreationActivity(navController: NavController  ) {
     var mExpanded by remember { mutableStateOf(false) }
     var mTextFieldSize by remember { mutableStateOf(Size.Zero)}
     var startDate = remember { mutableStateOf("") }
+    var startDateComplete by remember { mutableStateOf(DateTimeBody(0, 0, 0, 0, 0)) }
     var endDate = remember { mutableStateOf("") }
     var startTime = remember { mutableStateOf("") }
     var endTime = remember { mutableStateOf("") }
@@ -132,8 +136,8 @@ fun EventCreationActivity(navController: NavController  ) {
         displayname = eventName,
         description = eventDetails.value,
         location = placeID,
-        start = DateTimeBody(16, 8, 0, 11, 2023),
-        end = DateTimeBody(16, 10, 0, 11, 2023)
+        start = stringToDateTimeBody(startDate.value, startTime.value),
+        end = stringToDateTimeBody(endDate.value, endTime.value),
     )
 
     Scaffold(
@@ -163,6 +167,7 @@ fun EventCreationActivity(navController: NavController  ) {
                 /*TODO: Pass event into database*/
                 {
                     // Handle event submission logic here
+                    Log.d("EVENT_CREATION", eventBody.toString())
                     scope.launch {
                         val eventID = apiVM.createEvent(eventBody)
                         if (eventID > 0) {
@@ -349,7 +354,7 @@ fun EventCreationActivity(navController: NavController  ) {
                             .clickable { launchAutocomplete() },
                         trailingIcon = {
                             IconButton(
-                                onClick = { launchAutocomplete },
+                                onClick = { launchAutocomplete() },
                                 content = {
                                     Icon(
                                         Icons.Default.Search,

@@ -86,4 +86,7 @@ dependencies {
     // User Location
     implementation("com.google.android.gms:play-services-location:19.0.1")
 
+    // Autocomplete Implementation
+    implementation("com.google.android.libraries.places:places:3.1.0")
+
 }
