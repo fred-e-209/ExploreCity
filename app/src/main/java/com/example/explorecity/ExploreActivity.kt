@@ -26,10 +26,16 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableDoubleStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
@@ -39,6 +45,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.explorecity.ui.theme.DarkBlue
 import androidx.navigation.NavController
+import com.example.explorecity.api.classes.event.emptySingleEventResponse
+import com.example.explorecity.api.models.ApiViewModel
+import com.example.explorecity.api.models.EventStorage
+import com.example.explorecity.api.models.UserInformation
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.compose.GoogleMap
@@ -47,14 +57,12 @@ import com.google.maps.android.compose.MarkerInfoWindow
 import com.google.maps.android.compose.MarkerState
 import com.google.maps.android.compose.rememberCameraPositionState
 import com.google.maps.android.compose.rememberMarkerState
+import kotlinx.coroutines.launch
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ExploreActivity(navController: NavController) {
-    // Nav Controller
-
-
+fun ExploreActivity(navController: NavController, viewModel: ApiViewModel) {
     // Mutable state to keep track of the current view
     val viewMode = remember { mutableStateOf("map") } // "map" or "list"
 
@@ -106,25 +114,30 @@ fun ExploreActivity(navController: NavController) {
         ) {
             when (viewMode.value) {
                 "map" -> GoogleMapsView(navController, viewMode)
-                "list" -> EventsListView(navController)
-                "details" -> DetailsActivity(navController)
+                "list" -> EventsListView(navController, viewModel)
+                "details" -> DetailsActivity(navController, viewModel)
             }
         }
     }
 }
 
+@SuppressLint("CoroutineCreationDuringComposition")
 @Composable
 fun GoogleMapsView(navController: NavController, viewMode: MutableState<String>) {
-    val collegeStation = LatLng(30.627977, -96.334406)
+    val userLocation = UserInformation.instance.getUserLocation()
+    var currentUserLat by remember { mutableDoubleStateOf(0.0) }
+    var currentUserLon by remember { mutableDoubleStateOf(0.0) }
+    currentUserLat = userLocation.lat
+    currentUserLon = userLocation.lon
     val cameraPositionState = rememberCameraPositionState {
-        position = CameraPosition.fromLatLngZoom(collegeStation, 14.5f)
+        position = CameraPosition.fromLatLngZoom(LatLng(currentUserLat, currentUserLon), 14.5f)
     }
     GoogleMap(
         modifier = Modifier.fillMaxSize(),
         cameraPositionState = cameraPositionState
     ) {
         Marker(
-            state = rememberMarkerState(position = collegeStation),
+            state = rememberMarkerState(position = LatLng(currentUserLat, currentUserLon)),
             draggable = true,
             title = "Cstat",
             snippet = "Time: 8:00 pm"
@@ -165,17 +178,19 @@ fun GoogleMapsView(navController: NavController, viewMode: MutableState<String>)
 
 @SuppressLint("UnrememberedMutableState")
 @Composable
-fun EventsListView(navController: NavController) {
+fun EventsListView(navController: NavController, viewModel: ApiViewModel) {
+    val eventStorageInstance = EventStorage.instance
 
+    val events by viewModel.userEvents.observeAsState(emptyList())
 
-    val events = mutableStateListOf(
-        Event("Month, Year- Time", "Event 1", "Address, City, State"),
-        Event("Month, Year- Time", "Event 2", "Address, City, State")
-        // ... add more events
-    )
+    LaunchedEffect(Unit) {
+        viewModel.fetchUserEvents()
+    }
     Column(modifier = Modifier.fillMaxSize()) {
         Row(
-            modifier = Modifier.fillMaxWidth().padding(top =10.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 10.dp),
             horizontalArrangement = Arrangement.Center
         ) {
             Text(
@@ -189,6 +204,7 @@ fun EventsListView(navController: NavController) {
             items(events) { event ->
                 EventCard(event, onClick = {
                     // This is a placeholder for navigating to the event details
+                    eventStorageInstance.setEventID(event.id)
                     navController.navigate("details")
                 })
             }

@@ -40,5 +40,16 @@ interface ApiInterfaces {
     suspend fun updateUserLocation(@Path("eventID") eventID: Int)
 
     @GET("/event/search")
-    suspend fun searchEvent(@Query("query") query: String): List<EventDetailBody>
+    suspend fun searchFilterQuery(
+        @Query("query") query: String,
+        @Query("ey") startYear: Int,
+        @Query("em") startMonth: Int,
+        @Query("ed") startDay: Int,
+        @Query("ly") endYear: Int,
+        @Query("lm") endMonth: Int,
+        @Query("ld") endDay: Int,
+        @Query("lat") latitude: Double,
+        @Query("lon") longitude: Double,
+        @Query("radius") radius: Int
+    ): List<EventDetailBody>
 }

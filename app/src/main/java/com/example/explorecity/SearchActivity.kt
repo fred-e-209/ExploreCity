@@ -1,6 +1,7 @@
 package com.example.explorecity
 
 import android.annotation.SuppressLint
+import android.util.Log
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -13,6 +14,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -51,11 +53,20 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.example.explorecity.api.classes.auth.User
+import com.example.explorecity.api.classes.event.EventDetailBody
+import com.example.explorecity.api.classes.event.EventFilter
+import com.example.explorecity.api.classes.event.FilterEndDate
+import com.example.explorecity.api.classes.event.FilterStartDate
+import com.example.explorecity.api.classes.event.Location
 import com.example.explorecity.api.models.ApiViewModel
+import com.example.explorecity.api.models.EventStorage
+import com.example.explorecity.api.models.UserInformation
 import com.example.explorecity.ui.theme.DarkBlue
 import kotlinx.coroutines.launch
 import java.util.Date
@@ -67,24 +78,30 @@ fun SearchActivity(navController: NavController, viewModel: ApiViewModel) {
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val searchQuery = remember { mutableStateOf("") }
 
-//    val events = mutableStateListOf(
-//        Event("Month, Year- Time", "Event 1", "Address, City, State"),
-//        Event("Month, Year- Time", "Event 2", "Address, City, State")
-//        // ... add more events
-//    )
-
     val coroutineScope = rememberCoroutineScope()
-    var startDate by remember { mutableStateOf(Date()) }
-    var endDate by remember { mutableStateOf(Date()) }
+    var startDate = remember { mutableStateOf("") }
+    var endDate = remember { mutableStateOf("") }
     val selectedEventTypes = mutableStateListOf<String>()
     var selectedDistance by remember { mutableStateOf("") }
     val context = LocalContext.current
 
-    val userEvents by viewModel.userEvents.observeAsState(emptyList())
+    // API callers
+    val apiVM = ApiViewModel()
+    val userLocation = UserInformation.instance.getUserLocation()
+    val eventStorageInstance = EventStorage.instance
 
-    LaunchedEffect(Unit) {
-        viewModel.fetchUserEvents()
-    }
+    // filter class
+    val eventFilter = EventFilter(
+        query="",
+        startDate= FilterStartDate(0, 0, 0),
+        endDate = FilterEndDate(0, 0, 0),
+        userLocation = Location(0.0, 0.0),
+        radius = 0
+    )
+
+    val events: List<EventDetailBody> by remember { mutableStateOf(emptyList()) }
+
+
 
     CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl ) {
         ModalNavigationDrawer(
@@ -214,8 +231,13 @@ fun SearchActivity(navController: NavController, viewModel: ApiViewModel) {
                             // ... Add more distance buttons ...
 
                             Spacer(modifier = Modifier.height(16.dp))
-                            Button(onClick = {
+                            Button(onClick = { // TODO: Applies filter button
                                 coroutineScope.launch {
+                                    Log.d("SEARCH", "query: ${searchQuery.value}")
+                                    Log.d("SEARCH", "sdate: ${startDate.value}")
+                                    Log.d("SEARCH", "edate: ${endDate.value}")
+                                    Log.d("SEARCH", "dista: $selectedDistance")
+                                    Log.d("SEARCH", "usrlc: ${userLocation.lat} | ${userLocation.lon}")
                                     drawerState.close()
                                 }
                             }) {
@@ -262,8 +284,8 @@ fun SearchActivity(navController: NavController, viewModel: ApiViewModel) {
                         )
                         LazyColumn(modifier = Modifier.padding(5.dp)) {
                             items(events) { event ->
-                                EventCard(event, onClick = {
-                                    // This is a placeholder for navigating to the event details
+                                EventCard(event) {
+                                    eventStorageInstance.setEventID(event.id)
                                     navController.navigate("details")
                                 }
                             }

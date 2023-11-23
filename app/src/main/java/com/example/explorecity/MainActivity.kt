@@ -69,7 +69,7 @@ fun AppNavigator(viewModel: ApiViewModel) {
             DetailsActivity(navController, viewModel)
         }
         composable("details") {
-            DetailsActivity(navController)
+            DetailsActivity(navController, viewModel)
         }
         composable("questions") {
             CommonQuestions(navController)

@@ -84,14 +84,14 @@ fun EventCreationActivity(navController: NavController  ) {
 
     var eventName by remember { mutableStateOf("") }
     var eventLocation by remember { mutableStateOf("") }
-    var eventDetails by remember { mutableStateOf("") }
+    var eventDetails = remember { mutableStateOf("") }
     var eventType by remember { mutableStateOf("") }
     var mExpanded by remember { mutableStateOf(false) }
     var mTextFieldSize by remember { mutableStateOf(Size.Zero)}
-    var startDate by remember { mutableStateOf("") }
-    var endDate by remember { mutableStateOf("") }
-    var startTime by remember { mutableStateOf("") }
-    var endTime by remember { mutableStateOf("") }
+    var startDate = remember { mutableStateOf("") }
+    var endDate = remember { mutableStateOf("") }
+    var startTime = remember { mutableStateOf("") }
+    var endTime = remember { mutableStateOf("") }
     var placeID by remember { mutableStateOf("") }
     var location by remember {mutableStateOf("")}
     val context = LocalContext.current
@@ -130,7 +130,7 @@ fun EventCreationActivity(navController: NavController  ) {
 
     val eventBody = EventBody(
         displayname = eventName,
-        description = eventDetails,
+        description = eventDetails.value,
         location = placeID,
         start = DateTimeBody(16, 8, 0, 11, 2023),
         end = DateTimeBody(16, 10, 0, 11, 2023)
@@ -237,7 +237,7 @@ fun EventCreationActivity(navController: NavController  ) {
                 // Event Date
                 Text("Start Date",  Modifier.padding(top = 8.dp))
                 TextField(
-                    value = startDate,
+                    value = startDate.value,
                     onValueChange = { /* Do nothing as this is read-only */ },
                     readOnly = true,
                     placeholder = { Text("Select Date") },

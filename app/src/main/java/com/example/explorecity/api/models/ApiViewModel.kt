@@ -15,6 +15,7 @@ import com.example.explorecity.api.classes.auth.RegistrationErrorResponse
 import com.example.explorecity.api.classes.auth.RegistrationResponse
 import com.example.explorecity.api.classes.event.EventBody
 import com.example.explorecity.api.classes.event.EventDetailBody
+import com.example.explorecity.api.classes.event.Location
 import com.example.explorecity.api.classes.event.SingleEventResponse
 import kotlinx.coroutines.delay
 import org.json.JSONArray
@@ -148,5 +149,9 @@ class ApiViewModel: ViewModel() {
         } catch (e: Exception) {
             e.printStackTrace()
         }
+    }
+
+    suspend fun updateUserLocation(location: Location): Unit {
+
     }
 }

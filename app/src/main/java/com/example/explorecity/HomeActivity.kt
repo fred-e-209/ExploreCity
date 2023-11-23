@@ -115,7 +115,7 @@ fun HomeActivity(navController: NavController, viewModel: ApiViewModel) {
             NavHost(navBarController, startDestination = "events") {
                 composable("events") { MyEventsActivity(navBarController, viewModel) }
                 composable("search") { SearchActivity(navController, viewModel) }
-                composable("explore") { ExploreActivity(navBarController) }
+                composable("explore") { ExploreActivity(navBarController, viewModel) }
                 composable("profile") { ProfileActivity(navController)}
                 composable("details") { DetailsActivity(navBarController, viewModel)}
                 composable("chat") { ChatActivity(navBarController)}

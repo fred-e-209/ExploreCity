@@ -138,19 +138,18 @@ fun HostActivity (navController: NavController, viewModel: ApiViewModel) {
                         },
                         colors = TopAppBarDefaults.largeTopAppBarColors(
                             containerColor = DarkBlue,
-                        ),)
-
-                )
-        }
-    }
-        , content = {paddingValues ->
-        LazyColumn (modifier = androidx.compose.ui.Modifier.padding(paddingValues)){
-            items(hostEvents) { event ->
-                EventCard(event) {
-                    // This is a placeholder for navigating to the event details
-                    navController.navigate("details")
+                        ),
+                    )
+            }, content = {paddingValues ->
+                LazyColumn (modifier = androidx.compose.ui.Modifier.padding(paddingValues)){
+                    items(hostEvents) { event ->
+                        EventCard(event) {
+                            // This is a placeholder for navigating to the event details
+                            navController.navigate("details")
+                        }
+                    }
                 }
-            }
+            })
         }
-    })
+    )
 }
