@@ -30,19 +30,18 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.ui.Alignment
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.explorecity.api.models.ApiViewModel
+import com.example.explorecity.api.models.EventStorage
 import com.example.explorecity.ui.theme.DarkBlue
 import kotlinx.coroutines.launch
 
@@ -58,6 +57,7 @@ fun HostActivity (navController: NavController, viewModel: ApiViewModel) {
 
 
     val hostEvents by viewModel.userEvents.observeAsState(emptyList())
+    val eventStorage = EventStorage()
 
     LaunchedEffect(Unit) {
         viewModel.fetchHostEvents()
@@ -141,10 +141,11 @@ fun HostActivity (navController: NavController, viewModel: ApiViewModel) {
                         ),
                     )
             }, content = {paddingValues ->
-                LazyColumn (modifier = androidx.compose.ui.Modifier.padding(paddingValues)){
+                LazyColumn (modifier = Modifier.padding(paddingValues)){
                     items(hostEvents) { event ->
                         EventCard(event) {
                             // This is a placeholder for navigating to the event details
+                            eventStorage.setEventID(event.id)
                             navController.navigate("details")
                         }
                     }

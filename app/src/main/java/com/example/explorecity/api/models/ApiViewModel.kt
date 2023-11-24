@@ -9,10 +9,12 @@ import com.example.explorecity.api.callers.RetrofitInstance
 import com.example.explorecity.api.classes.auth.RegistrationBody
 import com.example.explorecity.api.classes.auth.RegistrationErrorResponse
 import com.example.explorecity.api.classes.auth.RegistrationResponse
+import com.example.explorecity.api.classes.event.DateTimeBody
 import com.example.explorecity.api.classes.event.EventBody
 import com.example.explorecity.api.classes.event.EventDetailBody
 import com.example.explorecity.api.classes.event.EventFilter
 import com.example.explorecity.api.classes.event.SingleEventResponse
+import com.example.explorecity.api.classes.event.emptySingleEventResponse
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.json.JSONArray
@@ -20,6 +22,7 @@ import org.json.JSONException
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import java.time.LocalDate
 
 class ApiViewModel: ViewModel() {
     private val _events = MutableLiveData<List<EventDetailBody>>()
@@ -31,9 +34,45 @@ class ApiViewModel: ViewModel() {
     private val _singleEvent = MutableLiveData<SingleEventResponse>()
     val singleEvent: LiveData<SingleEventResponse> = _singleEvent
 
-    suspend fun updateUserLocation(lat: Double, lon: Double) {
-        val userInfoInstance = UserInformation.instance
-        userInfoInstance.setUserLocation(lat = lat, lon = lon)
+    suspend fun sendUpdatedLocation() {
+        val eventsToday: List<Int> = UserInformation.instance.getUserEventIDs()
+        for (eventID in eventsToday) {
+            postUserLocationByEventID(eventID = eventID)
+        }
+    }
+
+    private suspend fun postUserLocationByEventID(eventID: Int) {
+        val userLocation = UserInformation.instance.getUserLocation()
+        try {
+            Log.d("LOCATION_UPDATE", "event id being used: $eventID")
+            RetrofitInstance.authenticateUser().updateUserLocationByEventID(coordinates = userLocation, eventID = eventID)
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
+    fun updateEventsToday(events: List<EventDetailBody>) {
+        val userEventsList = UserInformation.instance
+        userEventsList.clearUserEventIDs()
+        for (event in events) {
+            val isValid: Boolean = isBetweenDates(startTime = event.start, endTime = event.end, daysAdded = 1)
+            if (isValid) {
+                userEventsList.addToUserEventIDs(event.id)
+            }
+        }
+    }
+
+    fun isBetweenDates(startTime: DateTimeBody, currentTime: DateTimeBody? = null, endTime: DateTimeBody, daysAdded: Int? = null): Boolean {
+        val days = daysAdded ?: 0
+        val now = if (currentTime == null) LocalDate.now() else convertToLocalDate(currentTime)
+        val start = convertToLocalDate(startTime, daysAdded = -days)
+        val end = convertToLocalDate(endTime, daysAdded = days)
+        return (start.isBefore(now) && end.isAfter(now))
+    }
+
+    fun convertToLocalDate(date: DateTimeBody, daysAdded: Int? = null): LocalDate {
+        val days = daysAdded ?: 0
+        return LocalDate.of(date.year, date.month, date.day + days)
     }
 
     suspend fun createNewAccount(user: RegistrationBody): Pair<Int, List<RegistrationErrorResponse>> {
@@ -139,9 +178,11 @@ class ApiViewModel: ViewModel() {
         viewModelScope.launch {
             try {
                 val event = RetrofitInstance.authenticateUser().getSingleEvent(eventID)
+                Log.d("DETAILS", event.displayname)
                 _singleEvent.value = event
+                Log.d("DETAILS", event.description)
             } catch (e: Exception) {
-                throw e
+                _singleEvent.value = emptySingleEventResponse()
             }
         }
     }
@@ -150,6 +191,14 @@ class ApiViewModel: ViewModel() {
         return try {
             RetrofitInstance.authenticateUser().addUserToEvent(eventID = eventID, userID = userID)
         } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
+    suspend fun removeUserFromEvent(eventID: Int, userID: Int) {
+        return try {
+            RetrofitInstance.authenticateUser().removeUserFromEvent(eventID = eventID, userID = userID)
+        } catch (e:Exception) {
             e.printStackTrace()
         }
     }

@@ -280,7 +280,12 @@ fun SearchActivity(navController: NavController) {
                             items(searchEvents) { event ->
                                 EventCard(event) {
                                     eventStorageInstance.setEventID(event.id)
-                                    navController.navigate("details")
+                                    try {
+                                        navController.navigate("details")
+                                    } catch (e: Exception) {
+                                        e.printStackTrace()
+                                    }
+
                                 }
                             }
                         }

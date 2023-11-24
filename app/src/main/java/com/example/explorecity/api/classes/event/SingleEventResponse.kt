@@ -17,15 +17,15 @@ data class SingleEventResponse(
 
 fun emptySingleEventResponse(): SingleEventResponse {
     return SingleEventResponse(
-        address = "",
+        address = "loading",
         attendees = emptyList(),
         attending = false,
-        description = "",
-        displayname = "",
+        description = "loading",
+        displayname = "loading",
         end = DateTimeBody(-1, -1, -1, -1, -1),
-        host = SingleUserDetail("", -1, ""),
+        host = SingleUserDetail("unknown", -1, "unknown"),
         coords = Location(0.0,0.0),
         start = DateTimeBody(-1, -1, -1, -1, -1),
-        venue = ""
+        venue = "loading"
     )
 }

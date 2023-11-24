@@ -22,11 +22,9 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Place
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -49,16 +47,15 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.text.TextStyle
 import androidx.navigation.NavController
 import com.example.explorecity.api.classes.event.DateTimeBody
 import com.example.explorecity.api.classes.event.emptySingleEventResponse
@@ -67,8 +64,7 @@ import com.example.explorecity.api.models.EventStorage
 import com.example.explorecity.api.models.UserInformation
 import com.example.explorecity.ui.theme.DarkBlue
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
-import java.text.ParseException
+import kotlinx.coroutines.runBlocking
 import java.text.SimpleDateFormat
 import java.util.Locale
 
@@ -79,6 +75,8 @@ fun DetailsActivity(navBarController: NavController, viewModel: ApiViewModel) {
     var dialogMessage by remember { mutableStateOf("") }
     var showConfirmDialog by remember { mutableStateOf(false) }
 
+    var isFollowing by remember { mutableStateOf(false)}
+
     // Scrollable content since we don't know how long the description will be
     val eventID = EventStorage.instance.getEventID()
 
@@ -86,35 +84,38 @@ fun DetailsActivity(navBarController: NavController, viewModel: ApiViewModel) {
 
     val userInfo = UserInformation.instance
 
-    val scope = rememberCoroutineScope()
-
     LaunchedEffect(Unit) {
         try {
+            Log.d("DETAILS", "hitting")
             viewModel.fetchEvent(eventID)
+            delay(500)
+            isFollowing = event.attending
+            Log.d("DETAILS", "Event after: ${event.displayname}")
         } catch (e: Exception) {
             Log.e("DETAILEDEVENTPAGE", e.toString())
         }
     }
 
-    val isFollowing = event.attending // This should be a state that triggers recompositions when changed
+    val toggleFollow = {
+        runBlocking {
+            if (!isFollowing) {
+                viewModel.addUserToEvent(eventID = eventID, userID = userInfo.getUserID())
+            } else {
+                viewModel.removeUserFromEvent(eventID = eventID, userID = userInfo.getUserID())
+            }
+            isFollowing = !isFollowing
+            dialogMessage = if (isFollowing) {
+                "You are now following ${event.displayname}"
+            } else {
+                "You are no longer following ${event.displayname}"
+            }
+            showConfirmDialog = true
+        }
+    }
 
     // Use animateFloatAsState to animate the weight changes
     val followButtonWeight by animateFloatAsState(if (isFollowing) 1f else 3f, label = "")
     val chatButtonWeight by animateFloatAsState(if (isFollowing) 3f else 1f, label = "")
-
-
-    val toggleFollow = {
-        scope.launch {
-            viewModel.addUserToEvent(eventID = eventID, userID = userInfo.getUserID())
-            delay(2000)
-        }
-        dialogMessage = if (event.attending) {
-            "You are now following ${event.displayname}"
-        } else {
-            "You are no longer following ${event.displayname}"
-        }
-        showConfirmDialog = true
-    }
 
     Row (horizontalArrangement = Arrangement.SpaceBetween) {
         Icon(
@@ -175,7 +176,7 @@ fun DetailsActivity(navBarController: NavController, viewModel: ApiViewModel) {
                         )
                     )
                     Spacer(modifier = Modifier.height(4.dp))
-                    Text(text = "Hosted by ${event.host} ⚬ ${event.attendees} attending", style = TextStyle(color = Color.Gray))
+                    Text(text = "Hosted by ${event.host.displayname} ⚬ ${event.attendees.size} attending", style = TextStyle(color = Color.Gray))
                 }
             }
 
@@ -305,7 +306,7 @@ fun DetailsActivity(navBarController: NavController, viewModel: ApiViewModel) {
                             modifier = Modifier.width(25.dp).height(25.dp)
                         )
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text(event.venue)
+                        Text("Type: Special")
                     }
 
                     Spacer(modifier = Modifier.height(24.dp))
@@ -453,15 +454,16 @@ fun formatDate(inputDate: DateTimeBody): String {
 }
 
 fun formatTime(inputTime: DateTimeBody): String {
-    val inputFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
-    val outputFormat = SimpleDateFormat("h:mm a", Locale.getDefault())
-
-    return try {
-        val parsedDate = inputFormat.parse("${inputTime.hour}:${inputTime.minute}")
-        outputFormat.format(parsedDate)
-    } catch (e: ParseException) {
-        "Invalid time" // Handle invalid time format
-    }
+//    val inputFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
+//    val outputFormat = SimpleDateFormat("h:mm a", Locale.getDefault())
+//
+//    return try {
+//        val parsedDate = inputFormat.parse("${inputTime.hour}:${inputTime.minute}")
+//        outputFormat.format(parsedDate)
+//    } catch (e: ParseException) {
+//        "Invalid time" // Handle invalid time format
+//    }
+    return String.format("%02d:%02d", inputTime.hour, inputTime.minute)
 }
 
 

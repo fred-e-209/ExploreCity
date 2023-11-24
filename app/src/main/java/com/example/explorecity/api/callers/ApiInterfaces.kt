@@ -6,9 +6,11 @@ import com.example.explorecity.api.classes.auth.RegistrationResponse
 import com.example.explorecity.api.classes.event.EventBody
 import com.example.explorecity.api.classes.event.EventDetailBody
 import com.example.explorecity.api.classes.event.EventListResponse
+import com.example.explorecity.api.classes.event.Location
 import com.example.explorecity.api.classes.event.SingleEventResponse
 import retrofit2.Call
 import retrofit2.http.Body
+import retrofit2.http.DELETE
 import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.PUT
@@ -35,8 +37,11 @@ interface ApiInterfaces {
     @PUT("/event/{eventID}/user/{userID}")
     suspend fun addUserToEvent(@Path("eventID") eventID: Int, @Path("userID") userID: Int)
 
+    @DELETE("/event/{eventID}/user/{userID}")
+    suspend fun removeUserFromEvent(@Path("eventID") eventID: Int, @Path("userID") userID: Int)
+
     @POST("/location/event/{eventID}")
-    suspend fun updateUserLocation(@Path("eventID") eventID: Int)
+    suspend fun updateUserLocationByEventID(@Body coordinates: Location, @Path("eventID") eventID: Int)
 
     @GET("/event/search")
     suspend fun searchFilterQuery(

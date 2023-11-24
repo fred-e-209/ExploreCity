@@ -12,21 +12,14 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat
@@ -38,6 +31,7 @@ import com.example.explorecity.api.models.ApiViewModel
 import com.example.explorecity.api.models.UserInformation
 import com.example.explorecity.ui.theme.ExploreCityTheme
 import com.google.android.gms.location.*
+import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -86,12 +80,13 @@ class MainActivity : ComponentActivity() {
 
     // User Location Gathering
     private var locationCallback: LocationCallback? = null
-    var fusedLocationClient: FusedLocationProviderClient? = null
+    private var fusedLocationClient: FusedLocationProviderClient? = null
     private var locationRequired = false
 
     // User Info Data Store instance
-    val userInfo = UserInformation.instance
+    private val userInfo = UserInformation.instance
 
+    @OptIn(DelicateCoroutinesApi::class)
     @SuppressLint("CoroutineCreationDuringComposition")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -147,7 +142,15 @@ class MainActivity : ComponentActivity() {
                     while (true) {
                         delay(5000)
                         Log.d("LOCATION", "Lat: ${currentLocation.lat} | Lon: ${currentLocation.lon}")
-                        UserInformation.instance.setUserLocation(currentLocation.lat, currentLocation.lon)
+                        userInfo.setUserLocation(currentLocation.lat, currentLocation.lon)
+                    }
+                }
+
+                GlobalScope.launch {
+                    while (true) {
+                        delay(60_000)
+                        apiViewModel.sendUpdatedLocation()
+                        Log.d("LOCATION", "Sent user location update")
                     }
                 }
 
@@ -164,7 +167,7 @@ class MainActivity : ComponentActivity() {
             val locationRequest = LocationRequest.create().apply {
                 interval = 5000
                 fastestInterval = 5000
-                priority = LocationRequest.PRIORITY_HIGH_ACCURACY
+                priority = Priority.PRIORITY_HIGH_ACCURACY
             }
             fusedLocationClient?.requestLocationUpdates(
                 locationRequest,

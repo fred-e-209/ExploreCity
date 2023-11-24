@@ -12,6 +12,8 @@ class UserInformation {
         var userID = -1
 
         var userLocation = Location(lat = 0.0, lon = 0.0)
+
+        var userEventsForTheDay = mutableListOf<Int>()
     }
 
     fun getUsername() = username
@@ -38,5 +40,17 @@ class UserInformation {
 
     fun getUserLocation(): Location {
         return userLocation
+    }
+
+    fun getUserEventIDs(): List<Int> {
+        return userEventsForTheDay
+    }
+
+    fun addToUserEventIDs(eventID: Int) {
+        userEventsForTheDay.add(eventID)
+    }
+
+    fun clearUserEventIDs() {
+        userEventsForTheDay.clear()
     }
 }
