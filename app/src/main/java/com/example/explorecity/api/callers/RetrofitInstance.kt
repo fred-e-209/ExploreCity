@@ -25,10 +25,6 @@ object RetrofitInstance {
             .build()
     }
 
-    val loginService: ApiInterfaces by lazy {
-        baseRequestWithAuthentication().create(ApiInterfaces::class.java)
-    }
-
     fun authenticateUser(): ApiInterfaces {
         return baseRequestWithAuthentication().create(ApiInterfaces::class.java)
     }

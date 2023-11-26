@@ -31,6 +31,9 @@ interface ApiInterfaces {
     @POST("/event")
     suspend fun createNewEvent(@Body eventBody: EventBody): RegistrationResponse
 
+    @DELETE("/event/{eventID}")
+    suspend fun deleteEvent(@Path("eventID") eventID: Int): Call<Void>
+
     @GET("/event/{id}")
     suspend fun getSingleEvent(@Path("id") id: Int): SingleEventResponse
 

@@ -1,5 +1,6 @@
 package com.example.explorecity
 
+import android.annotation.SuppressLint
 import android.util.Log
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.Spring
@@ -142,7 +143,7 @@ fun DetailsActivity(navBarController: NavController, viewModel: ApiViewModel) {
                         modifier = Modifier.clickable(
                             onClick = { navBarController.popBackStack() })
                     )
-                }, actions = {ReportEventOption()}
+                }, actions = {ReportEventOption(eventID = eventID, event.host.id)}
             )
         }
     ){paddingValues->
@@ -303,7 +304,9 @@ fun DetailsActivity(navBarController: NavController, viewModel: ApiViewModel) {
                             },
                             contentDescription = "Event Type",
                             tint = DarkBlue,
-                            modifier = Modifier.width(25.dp).height(25.dp)
+                            modifier = Modifier
+                                .width(25.dp)
+                                .height(25.dp)
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Text("Type: Special")
@@ -338,16 +341,21 @@ fun DetailsActivity(navBarController: NavController, viewModel: ApiViewModel) {
 
 
 /*TODO: Pass event name (or ID?) to send the report*/
+@SuppressLint("CoroutineCreationDuringComposition")
 @Composable
-fun ReportEventOption() {
+fun ReportEventOption(eventID: Int, hostID: Int) {
     var expanded by remember { mutableStateOf(false) }
     var showDialog by remember { mutableStateOf(false) }
     var showConfirmDialog by remember { mutableStateOf(false) }
+    var showDeleteEventMessage by remember { mutableStateOf(false) }
     var selectedOption by remember { mutableStateOf<String?>(null) }
 
     // Options for reporting the event
-    val reportOptions = listOf("Fake Event", "Inappropriate Content", "Technical Issues", "Other")
+    val reportOptions = listOf("Fake Event", "Inappropriate Content", "Technical Issues", "Delete the event", "Other")
     var response = "A Report has been sent to the ExploreCity Team."
+
+    // API for deleting an event
+    val apiVM = ApiViewModel()
 
     // More options icon
     IconButton(onClick = { expanded = true }) {
@@ -364,6 +372,15 @@ fun ReportEventOption() {
             onClick = {
                 expanded = false
                 showDialog = true
+                showDeleteEventMessage = false
+            }
+        )
+        DropdownMenuItem(
+            text = { Text("Delete event") },
+            onClick = {
+                expanded = false
+                showDialog = false
+                showDeleteEventMessage = true
             }
         )
     }
@@ -372,7 +389,7 @@ fun ReportEventOption() {
     if (showDialog) {
         AlertDialog(
             onDismissRequest = { showDialog = false },
-            title = { Text("Report a problem") },
+            title = { Text("Report a problem or delete an event") },
             text = {
                 Column {
                     Text("Select the problem with the event:", modifier= Modifier.padding(bottom = 5.dp))
@@ -430,6 +447,26 @@ fun ReportEventOption() {
             confirmButton = {
                 Button(
                     onClick = { showConfirmDialog = false }
+                ) {
+                    Text("Dismiss")
+                }
+            }
+        )
+    }
+
+    if (showDeleteEventMessage) {
+        var returnMsg: String
+        runBlocking {
+            returnMsg = apiVM.deleteEvent(eventID, hostID)
+        }
+
+        AlertDialog(
+            onDismissRequest = { showDeleteEventMessage = false },
+            title = { Text("Deletion Processed") },
+            text = { Text(returnMsg) },
+            confirmButton = {
+                Button(
+                    onClick = { showDeleteEventMessage = false }
                 ) {
                     Text("Dismiss")
                 }

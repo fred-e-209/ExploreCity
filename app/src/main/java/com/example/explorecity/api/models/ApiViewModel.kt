@@ -109,8 +109,8 @@ class ApiViewModel: ViewModel() {
             }
         })
         delay(1500)
-        Log.d("REGISTRATION", listOfErrors[1].description)
-        Log.d("REGISTRATION", "$userID")
+//        Log.d("REGISTRATION", listOfErrors[1].description)
+//        Log.d("REGISTRATION", "$userID")
         return Pair(userID, listOfErrors)
     }
 
@@ -172,6 +172,18 @@ class ApiViewModel: ViewModel() {
         } catch (e: Exception) {
             -1
         }
+    }
+
+    suspend fun deleteEvent(eventID: Int, hostID: Int): String { // returns a message from the call
+        if (hostID != UserInformation.instance.getUserID()) {
+            return "User cannot delete event, event not deleted"
+        }
+        try {
+            RetrofitInstance.authenticateUser().deleteEvent(eventID)
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+        return "Deletion Successful"
     }
 
     fun fetchEvent(eventID: Int) {
