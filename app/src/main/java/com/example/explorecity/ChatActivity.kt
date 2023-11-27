@@ -1,5 +1,7 @@
 package com.example.explorecity
 
+import android.annotation.SuppressLint
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -22,7 +24,6 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.*
-import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -31,10 +32,16 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import java.text.SimpleDateFormat
-import java.util.Locale
-import java.util.Date
+import com.example.explorecity.api.classes.chat.Message
+import com.example.explorecity.api.models.ApiViewModel
+import com.example.explorecity.api.models.EventStorage
+import com.example.explorecity.api.models.UserInformation
 import com.example.explorecity.ui.theme.DarkBlue
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 import kotlin.random.Random
 
 
@@ -55,31 +62,41 @@ val standardColors = listOf(
     Color(0xFFFF8A65),
     Color(0xFFA1887F)
 )
-data class Message(val userName: String, val content: String, val timestamp: String)
 
+@SuppressLint("CoroutineCreationDuringComposition")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ChatActivity(navBarController: NavController) {
     // TODO: Get messages from database and update periodically
     // - Use Message.add() to add a message. It should appear instantly.
     // - Get display name
-    val displayName = "Freddy V"
-    val messages = remember {
-        mutableStateListOf(
-            Message("David L", "This is my message.", "OCT 30, 11:20 AM"),
-            Message("Lucas H", "This is my message.", "OCT 30, 2:51 PM"),
-            Message("Lucas H", "This is my message.", "OCT 30, 2:52 PM"),
-            Message("Freddy V", "This is my message.This is my message.This is my message." +
-                    "This is my message.This is my message. This is my message.", "OCT 30, 2:53 PM"),
-            Message("Lucas H", "This is my message.", "OCT 30, 2:54 PM"),
-            Message("David L", "This is my message.", "OCT 31, 11:20 AM"),
-            Message("Lucas H", "This is my message.", "OCT 31, 2:51 PM"),
-            Message("Lucas H", "This is my message.", "OCT 31, 2:52 PM"),
-            Message("Sam P", "This is my message.", "OCT 31, 3:10 PM"),
-        )
-    }
+    val userInfo = UserInformation.instance
+    val displayName = userInfo.getUserDisplayName()
+    var errorMsg by remember { mutableStateOf("") }
+    val messages = remember { mutableStateListOf<Message>() }
     var currentMessage by remember { mutableStateOf("") }
     val userColors = remember { mutableMapOf<String, Color>() }
+    var errorMsgToggle by remember { mutableStateOf(true) }
+
+    // Display error as toast
+    var toastMessage by remember { mutableStateOf<String?>(null) }
+
+    // API callers
+    val apiVM = ApiViewModel()
+    val eventID = EventStorage.instance.getEventID()
+    val scope = rememberCoroutineScope()
+
+    LaunchedEffect(Unit) {
+        while (true) {
+            errorMsg = apiVM.fetchChatMessages(eventID, messages)
+            delay(10000L)
+            Log.d("CHAT_ERROR", errorMsg)
+            if (messages.isEmpty() && errorMsgToggle) {
+                toastMessage = errorMsg
+                errorMsgToggle = false
+            }
+        }
+    }
 
     Scaffold(
         modifier = Modifier.padding(bottom = 80.dp),
@@ -95,7 +112,7 @@ fun ChatActivity(navBarController: NavController) {
                                 text = "Event Chat",
                                 fontWeight = FontWeight.Bold,
                                 color = DarkBlue,
-                                fontSize = 24.sp,
+                                fontSize = 24.sp
                             )
                         }
                     },
@@ -120,16 +137,25 @@ fun ChatActivity(navBarController: NavController) {
                     placeholder = { Text("Type a message...") },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 5.dp).padding(bottom = 10.dp),
+                        .padding(horizontal = 5.dp)
+                        .padding(bottom = 10.dp),
                     keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Send),
                     keyboardActions = KeyboardActions(onSend = {
-                        addMessage(displayName, currentMessage, messages)
-                        currentMessage = ""
+                        scope.launch {
+                            errorMsg = addMessage(api = apiVM, displayName = displayName, message = currentMessage, eventID = eventID, messages = messages)
+                            if (errorMsg.isNotBlank()) {
+                                toastMessage = "Post error: $errorMsg"
+                            }
+                            currentMessage = ""
+                        }
                     }),
                     trailingIcon = {
                         IconButton(onClick = {
-                            addMessage(displayName, currentMessage, messages)
-                            currentMessage = ""
+                            scope.launch {
+                                addMessage(api = apiVM, displayName = displayName, message = currentMessage, eventID = eventID, messages = messages)
+                                delay(200)
+                                currentMessage = ""
+                            }
                         }) {
                             Icon(Icons.Default.Send, contentDescription = "Send Message")
                         }
@@ -147,22 +173,27 @@ fun ChatActivity(navBarController: NavController) {
                 if (index != 0) {
                     Divider()
                 }
-                MessageRow(message = message, userColor = userColors.getOrPut(message.userName) { getUserColor(message.userName) })
+                MessageRow(message = message, userColor = userColors.getOrPut(message.userName) { getUserColor() })
             }
         }
     }
+    toastMessage?.let { message ->
+        DisplayToast(message = message)
+        // Clear the toast message to avoid displaying it again on recomposition
+        toastMessage = null
+    }
 }
 
-fun addMessage(userName: String, message: String, messages: SnapshotStateList<Message>){
-    // TODO: Send message to database
-    val currentDateTime = getCurrentDateTime()
-    messages.add(
-        Message(
-            userName,
-            message,
-            currentDateTime
-        )
-    )
+suspend fun addMessage(api: ApiViewModel, displayName: String, message: String, eventID: Int, messages: MutableList<Message>): String {
+    var errorMsg = ""
+    val response: Pair<Boolean, String> = api.postChatMessage(eventID = eventID, message = message)
+    delay(500)
+    if (!response.first) {
+        messages.add(Message(userName = displayName, content = message, timestamp = response.second))
+    } else {
+        errorMsg = response.second
+    }
+    return errorMsg
 }
 
 @Composable
@@ -203,7 +234,7 @@ fun MessageRow(message: Message, userColor: Color) {
 }
 
 
-fun getUserColor(userName: String): Color {
+fun getUserColor(): Color {
     val index = Random.Default.nextInt(standardColors.size)
     return standardColors[index]
 }

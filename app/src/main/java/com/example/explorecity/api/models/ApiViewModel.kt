@@ -1,14 +1,20 @@
 package com.example.explorecity.api.models
 
+import android.annotation.SuppressLint
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.explorecity.api.callers.RetrofitInstance
+import com.example.explorecity.api.classes.auth.LoginValidResponse
 import com.example.explorecity.api.classes.auth.RegistrationBody
 import com.example.explorecity.api.classes.auth.RegistrationErrorResponse
 import com.example.explorecity.api.classes.auth.RegistrationResponse
+import com.example.explorecity.api.classes.chat.ChatMessage
+import com.example.explorecity.api.classes.chat.ChatMessageBody
+import com.example.explorecity.api.classes.chat.Message
+import com.example.explorecity.api.classes.chat.TimeStamp
 import com.example.explorecity.api.classes.event.DateTimeBody
 import com.example.explorecity.api.classes.event.EventBody
 import com.example.explorecity.api.classes.event.EventDetailBody
@@ -19,10 +25,14 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.json.JSONArray
 import org.json.JSONException
+import org.json.JSONObject
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import java.text.SimpleDateFormat
 import java.time.LocalDate
+import java.util.Date
+import java.util.TimeZone
 
 class ApiViewModel: ViewModel() {
     private val _events = MutableLiveData<List<EventDetailBody>>()
@@ -133,12 +143,11 @@ class ApiViewModel: ViewModel() {
         return myList
     }
 
-    suspend fun isLoginValid(): Int {
+    suspend fun isLoginValid(): LoginValidResponse {
         return try {
-            val userAuth = RetrofitInstance.authenticateUser().validateLogin()
-            userAuth.id
+            RetrofitInstance.authenticateUser().validateLogin()
         } catch (e: Exception) {
-            -1
+            LoginValidResponse(-1, "null")
         }
     }
 
@@ -233,4 +242,123 @@ class ApiViewModel: ViewModel() {
             throw e
         }
     }
+
+    fun fetchChatMessages(eventID: Int, msgList: MutableList<Message>): String {
+        // Clear the current msgList:
+        msgList.clear()
+        var errorMsg = "No messages in chat yet, be the first one!"
+//        try {
+//            val chatList = RetrofitInstance.authenticateUser().getChatMessages(eventID)
+//            addMessagesToList(response = chatList, currentList = msgList)
+//        } catch (e: Exception) {
+//            e.printStackTrace()
+//            errorMsg = "Oops, something went wrong"
+//        }
+
+        val call = RetrofitInstance.authenticateUser().getChatMessages(eventID)
+        Log.d("MSG", "Event ID: $eventID")
+        call.enqueue(object: Callback<List<ChatMessage>> {
+            override fun onResponse(
+                call: Call<List<ChatMessage>>,
+                response: Response<List<ChatMessage>>
+            ) {
+                Log.d("MSG", "Response Code: ${response.code()}")
+                when (response.code()) {
+                    200 -> {
+                        addMessagesToList(response = response.body(), currentList = msgList)
+                        Log.d("MSG", response.body().toString())
+                    }
+                    401 -> errorMsg = "User not logged in"
+                    404 -> errorMsg = "Event does not exist"
+                    403 -> errorMsg = "User not authorized to send messages in this chat"
+                    else -> {
+                        Log.e("MSG", "Unknown response")
+                        errorMsg = "Unknown Error, please try again later"
+                    }
+                }
+            }
+            override fun onFailure(call: Call<List<ChatMessage>>, t: Throwable) {
+                errorMsg = "Unknown Error, please try again later"
+            }
+        }
+        )
+        return errorMsg
+    }
+
+    private fun addMessagesToList(response: List<ChatMessage>?, currentList: MutableList<Message>) {
+        if (response != null) {
+            for (msg in response) {
+                currentList.add(
+                    Message(
+                        userName = msg.sender.displayname,
+                        content = msg.text,
+                        timestamp = convertToStringDateTime(msg.time)
+                    )
+                )
+                Log.d("MSG", "added response: $msg")
+            }
+        }
+        if (response == null) {
+            Log.d("MSG", "response was null!")
+        }
+    }
+
+    fun postChatMessage(eventID: Int, message: String): Pair<Boolean, String> {
+        var msg = ""
+        var success = false
+        val call = RetrofitInstance.authenticateUser().postChatMessage(eventID, ChatMessageBody(text = message))
+        call.enqueue(object: Callback<TimeStamp> {
+            override fun onResponse(call: Call<TimeStamp>, response: Response<TimeStamp>) {
+                msg = when (response.code()) {
+                    200  -> {
+                        success = true
+                        "Successful message at: ${convertToStringDateTime(response.body()!!.time)}"
+                    }
+                    401  -> "User is not logged in"
+                    415  -> "Bad Request, contact support"
+                    400  -> "Bad Format, contact support"
+                    422  -> parseMessagePostingErrors(response.errorBody()!!.string())
+                    404  -> "Event doesn't exist"
+                    403  -> "User cannot post messages to this chat"
+                    500  -> "Internal server error, contact support"
+                    else -> "Unknown Error occurred, please try again"
+                }
+            }
+
+            override fun onFailure(call: Call<TimeStamp>, t: Throwable) {
+                msg = "Unknown Error occurred, please try again"
+            }
+        }
+        )
+
+        return Pair(success, msg)
+    }
+
+    @SuppressLint("SimpleDateFormat")
+    private fun convertToStringDateTime(unixTime: Double): String {
+        // Convert Unix timestamp to milliseconds
+        val timeInMillis: Double = kotlin.math.ceil(unixTime / 1000L)
+
+        // Create a Date object using the milliseconds
+        val date = Date(timeInMillis.toLong())
+
+        // Create a SimpleDateFormat object with the desired format and set the timezone
+        val sdf = SimpleDateFormat("MM/dd/yyyy HH:mm")
+        sdf.timeZone = TimeZone.getDefault() // You can set a specific timezone if needed
+
+        // Format the date and return the result
+        return sdf.format(date)
+    }
+
+    private fun parseMessagePostingErrors(errorJSON: String): String {
+        var errorMsg = ""
+        try {
+            val jsonBody = JSONObject(errorJSON)
+            errorMsg = jsonBody.optString("description")
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+        return errorMsg
+    }
+
 }
