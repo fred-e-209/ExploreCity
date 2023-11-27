@@ -33,6 +33,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
@@ -125,6 +126,7 @@ fun EventCard(event: EventDetailBody, onClick: () -> Unit) {
             .fillMaxWidth()
             .padding(8.dp)
             .clickable(onClick = onClick)
+            .height(135.dp)
             .border(
                 width = 1.dp,
                 color = DarkBlue, // Replace with your desired color
@@ -135,16 +137,26 @@ fun EventCard(event: EventDetailBody, onClick: () -> Unit) {
         ),
     ) {
         Row(
-            modifier = Modifier.padding(15.dp),
+            modifier = Modifier.padding(horizontal = 15.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Column (
-                modifier = Modifier.weight(1f) // This ensures that the column takes up as much space as possible
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.SpaceAround
             ){
-                Text(event.displayname, fontWeight = FontWeight.Bold)
-                Text(event.description)
-                Text(event.start.toString())
-                Text(event.end.toString())
+                Spacer(modifier = Modifier.height(15.dp),)
+                Text(formatDate(event.start) + " ⚬ " + formatTime(event.start), maxLines = 1, fontSize = 13.sp)
+                Spacer(modifier = Modifier.weight(0.5f))
+                Text(event.displayname,
+                    fontWeight = FontWeight.Bold,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
+                    color = DarkBlue,
+                    fontSize = 28.sp,
+                    )
+                Spacer(modifier = Modifier.weight(0.5f))
+                Text(event.description, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                Spacer(modifier = Modifier.height(15.dp))
             }
             Spacer(modifier = Modifier.width(16.dp)) // Space between text and icon
 

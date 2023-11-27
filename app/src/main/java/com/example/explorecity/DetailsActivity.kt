@@ -66,6 +66,7 @@ import com.example.explorecity.api.models.UserInformation
 import com.example.explorecity.ui.theme.DarkBlue
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
+import java.text.ParseException
 import java.text.SimpleDateFormat
 import java.util.Locale
 
@@ -76,14 +77,14 @@ fun DetailsActivity(navBarController: NavController, viewModel: ApiViewModel) {
     var dialogMessage by remember { mutableStateOf("") }
     var showConfirmDialog by remember { mutableStateOf(false) }
 
-    var isFollowing by remember { mutableStateOf(false)}
-
     // Scrollable content since we don't know how long the description will be
     val eventID = EventStorage.instance.getEventID()
 
     val event by viewModel.singleEvent.observeAsState(emptySingleEventResponse())
 
     val userInfo = UserInformation.instance
+
+    var isFollowing by remember { mutableStateOf(event.attending)}
 
     LaunchedEffect(Unit) {
         try {
@@ -309,7 +310,7 @@ fun DetailsActivity(navBarController: NavController, viewModel: ApiViewModel) {
                                 .height(25.dp)
                         )
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text("Type: Special")
+                        Text("Special Event")
                     }
 
                     Spacer(modifier = Modifier.height(24.dp))
@@ -491,16 +492,15 @@ fun formatDate(inputDate: DateTimeBody): String {
 }
 
 fun formatTime(inputTime: DateTimeBody): String {
-//    val inputFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
-//    val outputFormat = SimpleDateFormat("h:mm a", Locale.getDefault())
-//
-//    return try {
-//        val parsedDate = inputFormat.parse("${inputTime.hour}:${inputTime.minute}")
-//        outputFormat.format(parsedDate)
-//    } catch (e: ParseException) {
-//        "Invalid time" // Handle invalid time format
-//    }
-    return String.format("%02d:%02d", inputTime.hour, inputTime.minute)
+    val inputFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
+    val outputFormat = SimpleDateFormat("h:mm a", Locale.getDefault())
+
+    return try {
+        val parsedDate = inputFormat.parse("${inputTime.hour}:${inputTime.minute}")
+        outputFormat.format(parsedDate)
+    } catch (e: ParseException) {
+        "Invalid time" // Handle invalid time format
+    }
 }
 
 

@@ -26,6 +26,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableDoubleStateOf
@@ -119,7 +120,7 @@ fun ExploreActivity(navController: NavController, viewModel: ApiViewModel) {
                 .padding(bottom = 100.dp)
         ) {
             when (viewMode.value) {
-                "map" -> GoogleMapsView(navController, userEvents)
+                "map" -> GoogleMapsView(viewMode, userEvents)
                 "list" -> EventsListView(navController, userEvents)
                 "details" -> DetailsActivity(navController, viewModel)
             }
@@ -129,7 +130,7 @@ fun ExploreActivity(navController: NavController, viewModel: ApiViewModel) {
 
 @SuppressLint("CoroutineCreationDuringComposition")
 @Composable
-fun GoogleMapsView(navController: NavController, events: List<EventDetailBody>) {
+fun GoogleMapsView(viewMode: MutableState<String>, events: List<EventDetailBody>) {
     val userLocation = UserInformation.instance.getUserLocation()
     var currentUserLat by remember { mutableDoubleStateOf(0.0) }
     var currentUserLon by remember { mutableDoubleStateOf(0.0) }
@@ -153,7 +154,7 @@ fun GoogleMapsView(navController: NavController, events: List<EventDetailBody>) 
                 state = MarkerState(position = LatLng(event.coords.lat, event.coords.lon)),
                 onInfoWindowClick = {
                     EventStorage.instance.setEventID(event.id)
-                    navController.navigate("details")
+                    viewMode.value = "details"
                 },
                 title = event.displayname,
                 snippet = formatDate(event.start)

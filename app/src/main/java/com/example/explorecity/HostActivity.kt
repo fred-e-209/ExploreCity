@@ -80,8 +80,7 @@ fun HostActivity (navController: NavController, viewModel: ApiViewModel) {
                 ) {
                     // List of clickable text items
                     val items = mapOf(
-                        "User Preferences" to "prefs",
-                        "App Settings" to "settings",
+                        "My Account" to "account",
                         "Common Questions" to "questions",
                         "Log Out" to "login"
                     )
@@ -109,9 +108,9 @@ fun HostActivity (navController: NavController, viewModel: ApiViewModel) {
                         title = {
                             Box (modifier = Modifier.fillMaxWidth()){
                                 Text(
-                                    "My Events",
-                                    fontWeight = FontWeight.ExtraBold,
-                                    color = Color.White
+                                    text = "Hosted Events",
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color.Red
                                 )
                             }
                         },

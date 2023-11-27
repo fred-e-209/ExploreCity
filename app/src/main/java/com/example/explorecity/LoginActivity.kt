@@ -88,7 +88,7 @@ fun LoginActivity(navController: NavController, apiVM: ApiViewModel) {
         // Username/Email TextField
         OutlinedTextField(
             value = username, // bind to a state
-            label = { Text("Username/Email") },
+            label = { Text("Username") },
             onValueChange = {text->
                 username = text
             }, // update the state
@@ -176,22 +176,6 @@ fun LoginActivity(navController: NavController, apiVM: ApiViewModel) {
             Spacer(modifier = Modifier.weight(1f))  // This takes up one-third of the width
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
-
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Spacer(modifier = Modifier.weight(1f))  // This takes up one-third of the width
-            // Create Account Button
-            Button(onClick = {
-                navController.navigate("home")
-            }, modifier = Modifier.weight(10f))
-            {
-                Text(text = "Continue as Guest (Debug")
-            }
-            Spacer(modifier = Modifier.weight(1f))  // This takes up one-third of the width
-        }
     }
     toastMessage?.let { message ->
         DisplayToast(message = message)

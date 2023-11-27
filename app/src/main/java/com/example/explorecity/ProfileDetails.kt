@@ -16,10 +16,13 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material3.Typography
 import androidx.compose.ui.text.font.FontWeight
+import com.example.explorecity.api.models.UserInformation
 
 
 @Composable
 fun ProfileDetails(navController: NavController) {
+    val userInfo = UserInformation.instance
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -34,13 +37,10 @@ fun ProfileDetails(navController: NavController) {
         )
 
         Spacer(modifier = Modifier.height(32.dp))
-        HeaderQuestion2("Username:", "!!!USERNAME!!!.")
+        HeaderQuestion2("Username:", userInfo.getUsername())
         Spacer(modifier = Modifier.height(16.dp))
-        HeaderQuestion2("First Name:", "!!!FirstName!!!")
+        HeaderQuestion2("Display Name:", userInfo.getPassword())
         Spacer(modifier = Modifier.height(16.dp))
-        HeaderQuestion2("Last Name:", "!!!LastName!!!")
-        Spacer(modifier = Modifier.height(16.dp))
-        HeaderQuestion2("Account Email:", "!!!EMAIL!!!")
 
         Spacer(modifier = Modifier.height(64.dp))
 
