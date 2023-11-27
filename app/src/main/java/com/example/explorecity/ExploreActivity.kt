@@ -2,6 +2,7 @@ package com.example.explorecity
 
 import android.annotation.SuppressLint
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -15,29 +16,38 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
+import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableDoubleStateOf
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
@@ -56,16 +66,23 @@ import com.google.maps.android.compose.MarkerState
 import com.google.maps.android.compose.rememberCameraPositionState
 import com.google.maps.android.compose.rememberMarkerState
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 
+@SuppressLint("UnrememberedMutableState")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ExploreActivity(navController: NavController, viewModel: ApiViewModel) {
     // Mutable state to keep track of the current view
     val viewMode = remember { mutableStateOf("map") } // "map" or "list"
 
+    val recTypes = mutableStateListOf<String>()
+
+    val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val darkBlue = Color(0xFF003366)
     val white = Color.White
+
+    val coroutineScope = rememberCoroutineScope()
 
     val userEvents by viewModel.userEvents.observeAsState(emptyList())
 
@@ -75,56 +92,118 @@ fun ExploreActivity(navController: NavController, viewModel: ApiViewModel) {
         viewModel.updateEventsToday(userEvents)
     }
 
-    Scaffold(
-        topBar = {
-            Surface(shadowElevation = 10.dp, color = DarkBlue) {
-                TopAppBar(
-                    title = {
-                        Row (horizontalArrangement = Arrangement.Center, modifier = Modifier.fillMaxWidth()){
-                            TextButton(
-                                onClick = { viewMode.value = "map" },
-                                colors = ButtonDefaults.buttonColors(
-                                    containerColor = if (viewMode.value == "map") darkBlue else white,
-                                    contentColor = if (viewMode.value == "map") white else darkBlue
-                                )
+    CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl ) {
+        ModalNavigationDrawer(
+            drawerState = drawerState,
+            drawerContent = {
+                CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
+                    Surface(modifier = Modifier.width(300.dp), color = Color.White) {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(top = 16.dp, start = 16.dp, end = 16.dp),
+                            verticalArrangement = Arrangement.spacedBy(8.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Text(text = "Recommendation Filters",
+                                fontSize = 24.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = DarkBlue,
+                            )
+                            Spacer(modifier = Modifier.height(16.dp))
+                            Text(text = "Type", modifier = Modifier.padding(bottom= 5.dp), color= DarkBlue)
+                            Row(
+                                horizontalArrangement = Arrangement.SpaceEvenly,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(bottom = 5.dp)
                             ) {
-                                Text("Map")
+                                EventTypeButton("Restaurant", recTypes)
+                                EventTypeButton("Gas Station", recTypes)
                             }
-
-                            // List Button
-                            TextButton(
-                                onClick = { viewMode.value = "list" },
-                                colors = ButtonDefaults.buttonColors(
-                                    containerColor = if (viewMode.value == "list") darkBlue else white,
-                                    contentColor = if (viewMode.value == "list") white else darkBlue
-                                )
+                            Row(
+                                horizontalArrangement = Arrangement.SpaceEvenly,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(bottom = 5.dp)
                             ) {
-                                Text("List")
+                                EventTypeButton("Entertainment", recTypes)
+                                EventTypeButton("Hotel", recTypes)
                             }
-                        }
-                    },
-                    navigationIcon = {Spacer(modifier = Modifier.width(30.dp))},
-                    actions = {
-                        IconButton(onClick = { /* open drawer for filtering */ }) {
-                            Icon(painterResource(R.drawable.ic_filter), contentDescription = "Filter", tint = darkBlue)
+                            Button(onClick = { // TODO: Applies filter button
+                            }) {
+                                Text(text = "Apply Filters")
+                            }
                         }
                     }
-                )
+                }
+            },
+            content = {
+                CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
+                    Scaffold(
+                        topBar = {
+                            Surface(shadowElevation = 10.dp, color = DarkBlue) {
+                                TopAppBar(
+                                    title = {
+                                        Row(
+                                            horizontalArrangement = Arrangement.Center,
+                                            modifier = Modifier.fillMaxWidth()
+                                        ) {
+                                            TextButton(
+                                                onClick = { viewMode.value = "map" },
+                                                colors = ButtonDefaults.buttonColors(
+                                                    containerColor = if (viewMode.value == "map") darkBlue else white,
+                                                    contentColor = if (viewMode.value == "map") white else darkBlue
+                                                )
+                                            ) {
+                                                Text("Map")
+                                            }
+
+                                            // List Button
+                                            TextButton(
+                                                onClick = { viewMode.value = "list" },
+                                                colors = ButtonDefaults.buttonColors(
+                                                    containerColor = if (viewMode.value == "list") darkBlue else white,
+                                                    contentColor = if (viewMode.value == "list") white else darkBlue
+                                                )
+                                            ) {
+                                                Text("Recs")
+                                            }
+                                        }
+                                    },
+                                    navigationIcon = { Spacer(modifier = Modifier.width(30.dp)) },
+                                    actions = {
+                                        Icon(
+                                            painterResource(R.drawable.ic_filter),
+                                            contentDescription = "Filter",
+                                            tint = darkBlue,
+                                            modifier = Modifier.clickable {
+                                                coroutineScope.launch {
+                                                    drawerState.open()
+                                                }
+                                            }
+                                        )
+                                    }
+                                )
+                            }
+                        }
+                    ) { paddingValues ->
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(paddingValues)
+                                .padding(bottom = 100.dp)
+                        ) {
+                            when (viewMode.value) {
+                                "map" -> GoogleMapsView(viewMode, userEvents)
+                                "list" -> EventsListView(navController, userEvents)
+                                "details" -> DetailsActivity(navController, viewModel)
+                            }
+                        }
+                    }
+                }
             }
-        }
-    ) { paddingValues ->
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-                .padding(bottom = 100.dp)
-        ) {
-            when (viewMode.value) {
-                "map" -> GoogleMapsView(viewMode, userEvents)
-                "list" -> EventsListView(navController, userEvents)
-                "details" -> DetailsActivity(navController, viewModel)
-            }
-        }
+        )
     }
 }
 
@@ -202,7 +281,7 @@ fun EventsListView(navController: NavController, events: List<EventDetailBody>) 
             horizontalArrangement = Arrangement.Center
         ) {
             Text(
-                text = "Nearby Events",
+                text = "Nearby Recommendations",
                 fontWeight = FontWeight.Bold,
                 color = DarkBlue,
                 fontSize = 20.sp,

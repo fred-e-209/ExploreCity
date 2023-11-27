@@ -76,7 +76,7 @@ fun SearchActivity(navController: NavController) {
     val coroutineScope = rememberCoroutineScope()
     val startDate = remember { mutableStateOf("01-01-1997") }
     val endDate = remember { mutableStateOf("31-12-2099") }
-    val selectedEventTypes = mutableStateListOf<String>()
+    val selectedEventTypes =  mutableStateListOf<String>()
     var selectedDistance by remember { mutableStateOf("50") }
     val context = LocalContext.current
 
