@@ -10,6 +10,7 @@ class UserInformation {
         var username = ""
         var password = ""
         var userID = -1
+        var userDisplayName = ""
 
         var userLocation = Location(lat = 0.0, lon = 0.0)
 
@@ -26,6 +27,14 @@ class UserInformation {
 
     fun setPassword(input: String) {
         password = input
+    }
+
+    fun getUserDisplayName(): String {
+        return userDisplayName
+    }
+
+    fun setUserDisplayName(input: String) {
+        userDisplayName = input
     }
 
     fun getUserID() = userID

@@ -42,7 +42,7 @@ fun AppNavigator(viewModel: ApiViewModel) {
 
     NavHost(navController = navController, startDestination = "login") {
         composable("login") {
-            LoginActivity(navController, viewModel)
+            LoginActivity(navController)
         }
         composable("create_account") {
             AccountCreationActivity(navController)

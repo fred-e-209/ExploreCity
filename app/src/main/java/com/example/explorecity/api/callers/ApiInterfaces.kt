@@ -3,6 +3,9 @@ package com.example.explorecity.api.callers
 import com.example.explorecity.api.classes.auth.LoginValidResponse
 import com.example.explorecity.api.classes.auth.RegistrationBody
 import com.example.explorecity.api.classes.auth.RegistrationResponse
+import com.example.explorecity.api.classes.chat.ChatMessage
+import com.example.explorecity.api.classes.chat.ChatMessageBody
+import com.example.explorecity.api.classes.chat.TimeStamp
 import com.example.explorecity.api.classes.event.EventBody
 import com.example.explorecity.api.classes.event.EventDetailBody
 import com.example.explorecity.api.classes.event.EventListResponse
@@ -59,4 +62,10 @@ interface ApiInterfaces {
         @Query("lon") longitude: Double?,
         @Query("radius") radius: Int?
     ): List<EventDetailBody>
+
+    @GET("/event/{eventID}/chat")
+    fun getChatMessages(@Path("eventID") eventID: Int): Call<List<ChatMessage>>
+
+    @POST("/event/{eventID}/chat")
+    fun postChatMessage(@Path("eventID") eventID: Int, @Body chatMessage: ChatMessageBody): Call<TimeStamp>
 }

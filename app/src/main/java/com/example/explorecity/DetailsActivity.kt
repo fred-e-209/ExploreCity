@@ -87,13 +87,11 @@ fun DetailsActivity(navBarController: NavController, viewModel: ApiViewModel) {
 
     LaunchedEffect(Unit) {
         try {
-            Log.d("DETAILS", "hitting")
             viewModel.fetchEvent(eventID)
             delay(500)
             isFollowing = event.attending
-            Log.d("DETAILS", "Event after: ${event.displayname}")
         } catch (e: Exception) {
-            Log.e("DETAILEDEVENTPAGE", e.toString())
+            Log.e("DETAIL_PAGE", e.toString())
         }
     }
 
@@ -421,9 +419,7 @@ fun ReportEventOption(eventID: Int, hostID: Int) {
                             - The String selected will contain the report type
                             - Change condition to depend on whether the report is successful
                          */
-                        if (true){
-                            response = "There was an issue sending a response."
-                        }
+                        response = "There was an issue sending a response."
                         showConfirmDialog = true // Show confirmation after the report dialog
                     }
                 ) {
