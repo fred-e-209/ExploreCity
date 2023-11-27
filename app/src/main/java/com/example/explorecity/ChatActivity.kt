@@ -166,10 +166,10 @@ fun ChatActivity(navBarController: NavController) {
     ) { paddingValues ->
         LazyColumn(
             contentPadding = paddingValues,
-            reverseLayout = true, // This makes the list start from the bottom
+            reverseLayout = true,
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-            itemsIndexed(messages.reversed()) { index, message -> // Reverse the messages list to start from the bottom
+            itemsIndexed(messages) { index, message -> // Reverse the messages list to start from the bottom
                 if (index != 0) {
                     Divider()
                 }
