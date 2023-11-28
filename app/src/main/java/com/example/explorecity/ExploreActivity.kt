@@ -346,7 +346,7 @@ fun RecommendationCard(recommendation: RecommendationResponseBody) {
                 Spacer(modifier = Modifier.weight(0.5f))
                 Text(recommendation.address, maxLines = 1, overflow = TextOverflow.Ellipsis)
                 Spacer(modifier = Modifier.height(15.dp))
-                Text("Approximately ${BigDecimal(recommendation.distance).setScale(10, RoundingMode.HALF_UP).toDouble()} miles away", maxLines = 1, overflow = TextOverflow.Ellipsis)
+                Text("Approximately ${BigDecimal(recommendation.distance).setScale(1, RoundingMode.HALF_EVEN).toDouble()} miles away", maxLines = 1, overflow = TextOverflow.Ellipsis)
                 Spacer(modifier = Modifier.height(15.dp))
             }
             Spacer(modifier = Modifier.width(16.dp)) // Space between text and icon
