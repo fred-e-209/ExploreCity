@@ -85,7 +85,14 @@ class ApiViewModel: ViewModel() {
 
     fun convertToLocalDate(date: DateTimeBody, daysAdded: Int? = null): LocalDate {
         val days = daysAdded ?: 0
-        return LocalDate.of(date.year, date.month, date.day + days)
+        var localDate = LocalDate.of(date.year, date.month, date.day)
+        localDate = if (days > 0) {
+            localDate.plusDays(days.toLong())
+        } else {
+            localDate.minusDays(days.toLong())
+        }
+
+        return localDate
     }
 
     suspend fun createNewAccount(user: RegistrationBody): Pair<Int, List<RegistrationErrorResponse>> {
