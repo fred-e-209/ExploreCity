@@ -186,7 +186,7 @@ suspend fun addMessage(api: ApiViewModel, displayName: String, message: String, 
     val response: Pair<Boolean, String> = api.postChatMessage(eventID = eventID, message = message)
     delay(500)
     if (!response.first) {
-        messages.add(Message(userName = displayName, content = message, timestamp = response.second))
+        messages.add(index = 0, element = Message(userName = displayName, content = message, timestamp = response.second))
     } else {
         errorMsg = response.second
     }
