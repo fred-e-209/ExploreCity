@@ -1,5 +1,6 @@
 package com.example.explorecity.api.callers
 
+import com.example.explorecity.api.classes.RecommendationResponseBody
 import com.example.explorecity.api.classes.auth.LoginValidResponse
 import com.example.explorecity.api.classes.auth.RegistrationBody
 import com.example.explorecity.api.classes.auth.RegistrationResponse
@@ -62,6 +63,14 @@ interface ApiInterfaces {
         @Query("lon") longitude: Double?,
         @Query("radius") radius: Int?
     ): List<EventDetailBody>
+
+    @GET("/recommend")
+    suspend fun getRecommendations(
+        @Query("q") query: String?,
+        @Query("lat") latitude: Double,
+        @Query("lon") longitude: Double,
+        @Query("radius") radius: Int
+    ): List<RecommendationResponseBody>
 
     @GET("/event/{eventID}/chat")
     fun getChatMessages(@Path("eventID") eventID: Int): Call<List<ChatMessage>>

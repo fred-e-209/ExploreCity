@@ -2,6 +2,7 @@ package com.example.explorecity
 
 import android.annotation.SuppressLint
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -16,8 +17,12 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -33,7 +38,6 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableDoubleStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -47,10 +51,12 @@ import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.example.explorecity.api.classes.RecommendationResponseBody
 import com.example.explorecity.api.classes.event.EventDetailBody
 import com.example.explorecity.api.models.ApiViewModel
 import com.example.explorecity.api.models.EventStorage
@@ -65,8 +71,9 @@ import com.google.maps.android.compose.MarkerInfoWindow
 import com.google.maps.android.compose.MarkerState
 import com.google.maps.android.compose.rememberCameraPositionState
 import com.google.maps.android.compose.rememberMarkerState
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import java.math.BigDecimal
+import java.math.RoundingMode
 
 
 @SuppressLint("UnrememberedMutableState")
@@ -76,21 +83,26 @@ fun ExploreActivity(navController: NavController, viewModel: ApiViewModel) {
     // Mutable state to keep track of the current view
     val viewMode = remember { mutableStateOf("map") } // "map" or "list"
 
-    val recTypes = mutableStateListOf<String>()
+    val recTypes = remember { mutableStateListOf<String>() }
 
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val darkBlue = Color(0xFF003366)
     val white = Color.White
 
+    // API Callers
     val coroutineScope = rememberCoroutineScope()
+    var nearByEvents by remember { mutableStateOf(emptyList<EventDetailBody>()) }
+    val eventFilter = viewModel.explorePageFilter()
 
-    val userEvents by viewModel.userEvents.observeAsState(emptyList())
+    // Getting location recommendations
+    val recommendationList = remember { mutableStateListOf<RecommendationResponseBody>() }
+    val recFilter = viewModel.recommendationsFilter(query = recTypes.joinToString(separator = " "), location = null)
 
     LaunchedEffect(Unit) {
-        viewModel.fetchUserEvents()
-        delay(1000)
-        viewModel.updateEventsToday(userEvents)
+        nearByEvents = viewModel.fetchEventsByFilter(eventFilter = eventFilter)
     }
+
+
 
     CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl ) {
         ModalNavigationDrawer(
@@ -131,6 +143,10 @@ fun ExploreActivity(navController: NavController, viewModel: ApiViewModel) {
                                 EventTypeButton("Hotel", recTypes)
                             }
                             Button(onClick = { // TODO: Applies filter button
+                                coroutineScope.launch {
+                                    recommendationList.clear()
+                                    recommendationList.addAll(viewModel.getListOfRecommendations(recFilter))
+                                }
                             }) {
                                 Text(text = "Apply Filters")
                             }
@@ -195,8 +211,8 @@ fun ExploreActivity(navController: NavController, viewModel: ApiViewModel) {
                                 .padding(bottom = 100.dp)
                         ) {
                             when (viewMode.value) {
-                                "map" -> GoogleMapsView(viewMode, userEvents)
-                                "list" -> EventsListView(navController, userEvents)
+                                "map" -> GoogleMapsView(viewMode, nearByEvents)
+                                "list" -> EventsListView(recommendationList)
                                 "details" -> DetailsActivity(navController, viewModel)
                             }
                         }
@@ -271,8 +287,7 @@ fun GoogleMapsView(viewMode: MutableState<String>, events: List<EventDetailBody>
 
 @SuppressLint("UnrememberedMutableState")
 @Composable
-fun EventsListView(navController: NavController, events: List<EventDetailBody>) {
-    val eventStorageInstance = EventStorage.instance
+fun EventsListView(recommendations: List<RecommendationResponseBody>) {
     Column(modifier = Modifier.fillMaxSize()) {
         Row(
             modifier = Modifier
@@ -288,13 +303,55 @@ fun EventsListView(navController: NavController, events: List<EventDetailBody>) 
             )
         }
         LazyColumn (modifier = Modifier.padding(vertical=5.dp)){
-            items(events) { event ->
-                EventCard(event, onClick = {
-                    // This is a placeholder for navigating to the event details
-                    eventStorageInstance.setEventID(event.id)
-                    navController.navigate("details")
-                })
+            items(recommendations) { recommendation ->
+                RecommendationCard(recommendation = recommendation)
             }
+        }
+    }
+}
+
+@Composable
+fun RecommendationCard(recommendation: RecommendationResponseBody) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(8.dp)
+            .height(135.dp)
+            .border(
+                width = 1.dp,
+                color = DarkBlue, // Replace with your desired color
+                shape = RoundedCornerShape(size = 15.dp) // Match this with your Card's corner shape if any
+            ),
+        elevation = CardDefaults.cardElevation(
+            defaultElevation = 6.dp
+        ),
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 15.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Column (
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.SpaceAround
+            ){
+                Spacer(modifier = Modifier.height(15.dp))
+                Spacer(modifier = Modifier.weight(0.5f))
+                Text(recommendation.name,
+                    fontWeight = FontWeight.Bold,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
+                    color = DarkBlue,
+                    fontSize = 28.sp,
+                )
+                Spacer(modifier = Modifier.weight(0.5f))
+                Text(recommendation.address, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                Spacer(modifier = Modifier.height(15.dp))
+                Text("Approximately ${BigDecimal(recommendation.distance).setScale(10, RoundingMode.HALF_UP).toDouble()} miles away", maxLines = 1, overflow = TextOverflow.Ellipsis)
+                Spacer(modifier = Modifier.height(15.dp))
+            }
+            Spacer(modifier = Modifier.width(16.dp)) // Space between text and icon
+
+            Icon(Icons.Default.ArrowForward, contentDescription = "More details")
         }
     }
 }

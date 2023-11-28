@@ -39,9 +39,6 @@ import com.example.explorecity.api.models.UserInformation
 import com.example.explorecity.ui.theme.DarkBlue
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
 import kotlin.random.Random
 
 
@@ -239,7 +236,7 @@ fun getUserColor(): Color {
     return standardColors[index]
 }
 
-fun getCurrentDateTime(): String {
-    val dateFormat = SimpleDateFormat("MMM dd, h:mm a", Locale.getDefault())
-    return dateFormat.format(Date())
-}
+//fun getCurrentDateTime(): String {
+//    val dateFormat = SimpleDateFormat("MMM dd, h:mm a", Locale.getDefault())
+//    return dateFormat.format(Date())
+//}

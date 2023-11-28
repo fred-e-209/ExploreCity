@@ -144,7 +144,7 @@ fun EventCard(event: EventDetailBody, onClick: () -> Unit) {
                 modifier = Modifier.weight(1f),
                 verticalArrangement = Arrangement.SpaceAround
             ){
-                Spacer(modifier = Modifier.height(15.dp),)
+                Spacer(modifier = Modifier.height(15.dp))
                 Text(formatDate(event.start) + " ⚬ " + formatTime(event.start), maxLines = 1, fontSize = 13.sp)
                 Spacer(modifier = Modifier.weight(0.5f))
                 Text(event.displayname,

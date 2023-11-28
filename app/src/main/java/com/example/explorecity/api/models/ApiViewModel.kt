@@ -7,6 +7,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.explorecity.api.callers.RetrofitInstance
+import com.example.explorecity.api.classes.RecommendationResponseBody
 import com.example.explorecity.api.classes.auth.LoginValidResponse
 import com.example.explorecity.api.classes.auth.RegistrationBody
 import com.example.explorecity.api.classes.auth.RegistrationErrorResponse
@@ -19,6 +20,7 @@ import com.example.explorecity.api.classes.event.DateTimeBody
 import com.example.explorecity.api.classes.event.EventBody
 import com.example.explorecity.api.classes.event.EventDetailBody
 import com.example.explorecity.api.classes.event.EventFilter
+import com.example.explorecity.api.classes.event.Location
 import com.example.explorecity.api.classes.event.SingleEventResponse
 import com.example.explorecity.api.classes.event.emptySingleEventResponse
 import kotlinx.coroutines.delay
@@ -31,6 +33,7 @@ import retrofit2.Callback
 import retrofit2.Response
 import java.text.SimpleDateFormat
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.Date
 import java.util.TimeZone
 
@@ -243,6 +246,43 @@ class ApiViewModel: ViewModel() {
         }
     }
 
+    fun explorePageFilter(): EventFilter {
+        val currentTime: DateTimeBody = getCurrentDate()
+        val weekFromNow: DateTimeBody = getCurrentDate(7)
+        val userLocation = UserInformation.instance.getUserLocation()
+
+        return EventFilter(
+            query = null,
+            startDate = currentTime,
+            endDate = weekFromNow,
+            userLocation = userLocation,
+            radius = 50
+        )
+    }
+
+    fun recommendationsFilter(query:String, location: Location?): EventFilter {
+        return EventFilter(
+            query = query,
+            startDate = DateTimeBody(0, 0, 0, 0, 0),
+            endDate = DateTimeBody(0, 0, 0, 0, 0),
+            userLocation = location ?: UserInformation.instance.getUserLocation(),
+            radius = 10
+        )
+    }
+
+    suspend fun getListOfRecommendations(filter: EventFilter): List<RecommendationResponseBody> {
+        return try {
+            RetrofitInstance.authenticateUser().getRecommendations(
+                query = filter.query,
+                latitude = filter.userLocation.lat,
+                longitude = filter.userLocation.lon,
+                radius = filter.radius
+            )
+        } catch (e: Exception) {
+            emptyList()
+        }
+    }
+
     fun fetchChatMessages(eventID: Int, msgList: MutableList<Message>): String {
         // Clear the current msgList:
         msgList.clear()
@@ -361,4 +401,16 @@ class ApiViewModel: ViewModel() {
         return errorMsg
     }
 
+    fun getCurrentDate(daysAdded: Int = 0): DateTimeBody {
+        var currentDateTime = LocalDateTime.now()
+        currentDateTime = currentDateTime.plusDays(daysAdded.toLong())
+
+        return DateTimeBody(
+            day = currentDateTime.dayOfMonth,
+            hour = currentDateTime.hour,
+            minute = currentDateTime.minute,
+            month = currentDateTime.monthValue,
+            year = currentDateTime.year
+        )
+    }
 }
