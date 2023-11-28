@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -344,14 +345,17 @@ fun RecommendationCard(recommendation: RecommendationResponseBody) {
                     fontSize = 28.sp,
                 )
                 Spacer(modifier = Modifier.weight(0.5f))
-                Text(recommendation.address, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                Spacer(modifier = Modifier.height(15.dp))
-                Text("Approximately ${BigDecimal(recommendation.distance).setScale(1, RoundingMode.HALF_EVEN).toDouble()} miles away", maxLines = 1, overflow = TextOverflow.Ellipsis)
+                Text(recommendation.address, maxLines = 2, overflow = TextOverflow.Ellipsis)
                 Spacer(modifier = Modifier.height(15.dp))
             }
+            Text("Approximately ${String.format("%.1f", recommendation.distance)} miles away",
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier
+                    .fillMaxHeight()
+                    .align(Alignment.Top),
+            )
             Spacer(modifier = Modifier.width(16.dp)) // Space between text and icon
-
-            Icon(Icons.Default.ArrowForward, contentDescription = "More details")
         }
     }
 }
