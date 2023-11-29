@@ -5,6 +5,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -38,7 +39,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.explorecity.api.models.ApiViewModel
 import com.example.explorecity.api.models.EventStorage
@@ -102,7 +105,7 @@ fun HostActivity (navController: NavController, viewModel: ApiViewModel) {
                 }
             }
         },
-        content=  {
+        content = {
             Scaffold(topBar = {
                     TopAppBar(
                         title = {
@@ -110,7 +113,7 @@ fun HostActivity (navController: NavController, viewModel: ApiViewModel) {
                                 Text(
                                     text = "Hosted Events",
                                     fontWeight = FontWeight.Bold,
-                                    color = Color.Red
+                                    color = Color.White
                                 )
                             }
                         },
@@ -140,12 +143,28 @@ fun HostActivity (navController: NavController, viewModel: ApiViewModel) {
                         ),
                     )
             }, content = {paddingValues ->
-                LazyColumn (modifier = Modifier.padding(paddingValues)){
-                    items(hostEvents) { event ->
-                        EventCard(event) {
-                            // This is a placeholder for navigating to the event details
-                            eventStorage.setEventID(event.id)
-                            navController.navigate("details")
+                Column {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(paddingValues),
+                        horizontalArrangement = Arrangement.Center
+                    ) {
+                        Text(
+                            text = "Hosted Events",
+                            modifier = Modifier.padding(top = 5.dp),
+                            fontWeight = FontWeight.Bold,
+                            color = DarkBlue,
+                            fontSize = 20.sp,
+                        )
+                    }
+                    LazyColumn(modifier = Modifier.padding(top = 5.dp)) {
+                        items(hostEvents) { event ->
+                            EventCard(event) {
+                                // This is a placeholder for navigating to the event details
+                                eventStorage.setEventID(event.id)
+                                navController.navigate("details")
+                            }
                         }
                     }
                 }
@@ -153,3 +172,18 @@ fun HostActivity (navController: NavController, viewModel: ApiViewModel) {
         }
     )
 }
+/*
+fun HostActivity (navController: NavController, viewModel: ApiViewModel){
+    Scaffold(topBar = {
+        TopAppBar(
+            title = {
+                Box (modifier = Modifier.fillMaxWidth()){
+                    Text(
+                        text = "Hosted Events",
+                        fontWeight = FontWeight.Bold,
+                        color = DarkBlue
+                    )
+                }
+            })},
+    content = {paddingValues -> Text("Howdy", modifier = Modifier.padding(paddingValues))})
+}*/

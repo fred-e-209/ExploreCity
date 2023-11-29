@@ -133,6 +133,7 @@ fun DetailsActivity(navBarController: NavController, viewModel: ApiViewModel) {
     }
 
     Scaffold (
+        modifier = Modifier.verticalScroll(rememberScrollState()),
         topBar = {
             TopAppBar(title = {Text(text = "")},
                 navigationIcon = {
