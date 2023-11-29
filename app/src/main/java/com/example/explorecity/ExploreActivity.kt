@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -18,8 +17,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -108,6 +105,7 @@ fun ExploreActivity(navController: NavController, viewModel: ApiViewModel) {
     CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl ) {
         ModalNavigationDrawer(
             drawerState = drawerState,
+            gesturesEnabled = false,
             drawerContent = {
                 CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
                     Surface(modifier = Modifier.width(300.dp), color = Color.White) {
@@ -147,6 +145,7 @@ fun ExploreActivity(navController: NavController, viewModel: ApiViewModel) {
                                 coroutineScope.launch {
                                     recommendationList.clear()
                                     recommendationList.addAll(viewModel.getListOfRecommendations(recFilter))
+                                    drawerState.close()
                                 }
                             }) {
                                 Text(text = "Apply Filters")
@@ -211,8 +210,9 @@ fun ExploreActivity(navController: NavController, viewModel: ApiViewModel) {
                                 .padding(paddingValues)
                                 .padding(bottom = 100.dp)
                         ) {
+                            val lastIndex = if (recommendationList.size > 10) 10 else recommendationList.size
                             when (viewMode.value) {
-                                "map" -> GoogleMapsView(viewMode, nearByEvents)
+                                "map" -> GoogleMapsView(viewMode, nearByEvents, recommendationList.subList(0, lastIndex)) // Pass in only 10 locations from list onto map
                                 "list" -> EventsListView(recommendationList)
                                 "details" -> DetailsActivity(navController, viewModel)
                             }
@@ -226,7 +226,7 @@ fun ExploreActivity(navController: NavController, viewModel: ApiViewModel) {
 
 @SuppressLint("CoroutineCreationDuringComposition")
 @Composable
-fun GoogleMapsView(viewMode: MutableState<String>, events: List<EventDetailBody>) {
+fun GoogleMapsView(viewMode: MutableState<String>, events: List<EventDetailBody>, recommendations: List<RecommendationResponseBody>) {
     val userLocation = UserInformation.instance.getUserLocation()
     var currentUserLat by remember { mutableDoubleStateOf(0.0) }
     var currentUserLon by remember { mutableDoubleStateOf(0.0) }
@@ -245,7 +245,9 @@ fun GoogleMapsView(viewMode: MutableState<String>, events: List<EventDetailBody>
             title = "Your Location",
             icon = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_VIOLET)
         )
-        for (event in events){
+
+        // Displays near by events
+        for (event in events) {
             MarkerInfoWindow(
                 state = MarkerState(position = LatLng(event.coords.lat, event.coords.lon)),
                 onInfoWindowClick = {
@@ -275,6 +277,42 @@ fun GoogleMapsView(viewMode: MutableState<String>, events: List<EventDetailBody>
                         Spacer(modifier = Modifier.height(8.dp)) // Add more vertical space
                         Text(
                             text = marker.snippet ?: "Time: Unknown",
+                            color = Color.Black,
+                            style = TextStyle(fontWeight = FontWeight.Normal)
+                        )
+                    }
+                }
+            }
+        }
+
+        // Displays recommendations
+        for (recommendation in recommendations) {
+            MarkerInfoWindow(
+                state = MarkerState(position = LatLng(recommendation.location.lat, recommendation.location.lon)),
+                icon = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ORANGE),
+                title = recommendation.name,
+                snippet = "Miles Away: ${BigDecimal(recommendation.distance).setScale(1, RoundingMode.HALF_EVEN).toDouble()}"
+            )
+            { marker ->
+                Box(
+                    modifier = Modifier
+                        .padding(16.dp) // Adjust padding for spacing
+                        .background(
+                            Color.White,
+                            shape = RoundedCornerShape(8.dp)
+                        ) // Adjust corner radius
+                ) {
+                    Column(
+                        modifier = Modifier.padding(16.dp)
+                    ) {
+                        Text(
+                            text = marker.title ?: "Unknown",
+                            color = Color.Black,
+                            style = TextStyle(fontWeight = FontWeight.Bold)
+                        )
+                        Spacer(modifier = Modifier.height(8.dp)) // Add more vertical space
+                        Text(
+                            text = marker.snippet ?: "Miles Away: Unknown",
                             color = Color.Black,
                             style = TextStyle(fontWeight = FontWeight.Normal)
                         )
@@ -330,13 +368,20 @@ fun RecommendationCard(recommendation: RecommendationResponseBody) {
         Row(
             modifier = Modifier.padding(horizontal = 15.dp),
             verticalAlignment = Alignment.CenterVertically,
-        ) {
+        )
+        {
             Column (
                 modifier = Modifier.weight(1f),
                 verticalArrangement = Arrangement.SpaceAround
             ){
-                Spacer(modifier = Modifier.height(15.dp))
-                Spacer(modifier = Modifier.weight(0.5f))
+                Spacer(modifier = Modifier.height(2.dp))
+                Text("${String.format("%.1f", recommendation.distance)} miles away",
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier
+                        .align(Alignment.End),
+                )
+                Spacer(modifier = Modifier.height(1.dp))
                 Text(recommendation.name,
                     fontWeight = FontWeight.Bold,
                     maxLines = 2,
@@ -348,13 +393,6 @@ fun RecommendationCard(recommendation: RecommendationResponseBody) {
                 Text(recommendation.address, maxLines = 2, overflow = TextOverflow.Ellipsis)
                 Spacer(modifier = Modifier.height(15.dp))
             }
-            Text("Approximately ${String.format("%.1f", recommendation.distance)} miles away",
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                modifier = Modifier
-                    .fillMaxHeight()
-                    .align(Alignment.Top),
-            )
             Spacer(modifier = Modifier.width(16.dp)) // Space between text and icon
         }
     }
